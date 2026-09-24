@@ -1,85 +1,133 @@
 import os
-import re
-import shutil
-import tarfile
-import zipfile
-import subprocess
 from PySide6.QtWidgets import QMessageBox, QFileDialog, QInputDialog
 
+from . import grub_core
+from .utils import logger, run_pkexec_shell
+from .workers import Worker
+
+
 class GrubManager:
+    """Widgets 薄层：控件读写 + 弹窗，逻辑全部走 grub_core。"""
+
     def __init__(self, app_ctx):
         self.ctx = app_ctx
-        self.system_themes_root = "/usr/share/grub/themes" 
-
-    def refresh_current_grub_theme(self):
-        if not os.path.exists("/etc/default/grub"): return
-        try:
-            with open("/etc/default/grub", "r", encoding="utf-8") as f: content = f.read()
-            match = re.search(r'^\s*GRUB_THEME=["\' ]?([^"\'\n]+)["\' ]?', content, re.MULTILINE)
-            if match:
-                raw_path = match.group(1).strip()
-                theme_name = os.path.basename(os.path.dirname(raw_path))
-                status_text = f"当前正在使用的主题：【 {theme_name} 】"
-            else: status_text = "当前正在使用的主题：系统默认文字菜单 (未启用主题)"
-            if self.ctx.current_grub_lbl: self.ctx.current_grub_lbl.setText(status_text)
-        except Exception as e: print(e)
+        self.system_themes_root = grub_core.SYSTEM_THEMES_ROOT
+        self._workers: list[Worker] = []
 
     def refresh_local_themes_combo(self):
-        if not self.ctx.grub_theme_combo or not os.path.exists(self.system_themes_root): return
-        valid_themes = []
+        """下拉框即当前状态：选中项默认定位到正在使用的主题。"""
+        if not self.ctx.grub_theme_combo:
+            return
         try:
-            for name in os.listdir(self.system_themes_root):
-                full_path = os.path.join(self.system_themes_root, name)
-                if os.path.isdir(full_path) and os.path.exists(os.path.join(full_path, "theme.txt")): valid_themes.append(name)
-            valid_themes.sort()
+            valid_themes = grub_core.list_local_themes(self.system_themes_root)
+            current, _ = grub_core.get_current_theme()
             self.ctx.grub_theme_combo.clear()
             self.ctx.grub_theme_combo.addItems(valid_themes)
-        except Exception as e: print(e)
+            if current in valid_themes:
+                self.ctx.grub_theme_combo.setCurrentIndex(valid_themes.index(current))
+            logger.debug(f"grub combo synced to '{current}'")
+        except Exception as e:
+            logger.warning(f"refresh_local_themes_combo failed: {e}")
 
     def dispatch_grub_apply(self):
         user_input_path = self.ctx.grub_path_edit.text().strip()
-        if user_input_path: self.apply_grub_theme_archive(user_input_path)
-        else: self.apply_local_grub_theme_switch()
+        if user_input_path:
+            self.apply_grub_theme_archive(user_input_path)
+        else:
+            self.apply_local_grub_theme_switch()
 
     def apply_local_grub_theme_switch(self):
-        if not self.ctx.grub_theme_combo or self.ctx.grub_theme_combo.currentIndex() == -1: return
+        if not self.ctx.grub_theme_combo or self.ctx.grub_theme_combo.currentIndex() == -1:
+            return
         selected_name = self.ctx.grub_theme_combo.currentText()
-        target_theme_txt = os.path.join(self.system_themes_root, selected_name, "theme.txt")
-        shell_script = f"sed -i '/^GRUB_THEME=/d' /etc/default/grub && echo 'GRUB_THEME=\"{target_theme_txt}\"' >> /etc/default/grub && grub2-mkconfig -o /boot/grub2/grub.cfg"
-        if subprocess.run(["pkexec", "sh", "-c", shell_script]).returncode == 0:
-            QMessageBox.information(self.ctx.window, "成功", f"成功切换本地已有主题：【{selected_name}】")
-            self.refresh_current_grub_theme()
+        try:
+            script = grub_core.build_switch_script(selected_name, self.system_themes_root)
+        except ValueError as e:
+            QMessageBox.critical(self.ctx.window, "错误", str(e))
+            return
+        self._run_async(script, f"成功切换本地已有主题：【{selected_name}】")
 
     def smart_browse_grub(self):
         file_path, _ = QFileDialog.getOpenFileName(self.ctx.window, "选择 GRUB 主题", os.path.expanduser("~/Downloads"), "所有文件 (*)")
-        if file_path: self.ctx.grub_path_edit.setText(file_path)
+        if file_path:
+            self.ctx.grub_path_edit.setText(file_path)
 
     def apply_grub_theme_archive(self, user_input_path):
-        sandbox_dir = "/tmp/grub_theme_sandbox"
-        if os.path.exists(sandbox_dir): shutil.rmtree(sandbox_dir)
-        os.makedirs(sandbox_dir, exist_ok=True)
         try:
-            if user_input_path.endswith('.zip'):
-                with zipfile.ZipFile(user_input_path, 'r') as z: z.extractall(sandbox_dir)
-            else:
-                with tarfile.open(user_input_path, 'r:*') as t: t.extractall(sandbox_dir)
-            detected_themes = {}
-            for root, dirs, files in os.walk(sandbox_dir):
-                if "theme.txt" in files:
-                    current_dir = os.path.dirname(os.path.join(root, "theme.txt"))
-                    detected_themes[f"{os.path.basename(os.path.dirname(current_dir))} - {os.path.basename(current_dir)}"] = current_dir
-            if not detected_themes: raise ValueError("配置丢失！")
-            elif len(detected_themes) == 1: final_source_dir = list(detected_themes.values())[0]
-            else:
-                chosen, ok = QInputDialog.getItem(self.ctx.window, "选择版本", "分辨率款式选择：", sorted(list(detected_themes.keys())), current=0, editable=False)
-                if not ok: return
-                final_source_dir = detected_themes[chosen]
-            final_theme_dir_name = os.path.basename(final_source_dir)
-        except Exception as e: QMessageBox.critical(self.ctx.window, "解析失败", str(e)); return
+            sandbox_dir = grub_core.extract_archive(user_input_path)
+            detected_themes = grub_core.find_theme_dirs(sandbox_dir)
+        except Exception as e:
+            QMessageBox.critical(self.ctx.window, "解析失败", str(e))
+            return
 
-        target_system_path = os.path.join(self.system_themes_root, final_theme_dir_name)
-        shell_script = f"mkdir -p \"{self.system_themes_root}\" && cp -r \"{final_source_dir}\" \"{target_system_path}\" && sed -i '/^GRUB_THEME=/d' /etc/default/grub && echo 'GRUB_THEME=\"{os.path.join(target_system_path, 'theme.txt')}\"' >> /etc/default/grub && grub2-mkconfig -o /boot/grub2/grub.cfg"
-        if subprocess.run(["pkexec", "sh", "-c", shell_script]).returncode == 0:
+        if len(detected_themes) == 1:
+            final_source_dir = list(detected_themes.values())[0]
+        else:
+            chosen, ok = QInputDialog.getItem(self.ctx.window, "选择版本", "分辨率款式选择：", sorted(list(detected_themes.keys())), current=0, editable=False)
+            if not ok:
+                grub_core.cleanup_sandbox(sandbox_dir)
+                return
+            final_source_dir = detected_themes[chosen]
+
+        try:
+            script, _ = grub_core.build_install_script(final_source_dir, self.system_themes_root)
+        except ValueError as e:
+            QMessageBox.critical(self.ctx.window, "解析失败", str(e))
+            grub_core.cleanup_sandbox(sandbox_dir)
+            return
+
+        def on_success():
+            self.refresh_local_themes_combo()
+            if self.ctx.grub_path_edit:
+                self.ctx.grub_path_edit.clear()
             QMessageBox.information(self.ctx.window, "成功", "外部主题安装应用成功！")
-            self.refresh_current_grub_theme(); self.refresh_local_themes_combo(); self.ctx.grub_path_edit.clear()
-        if os.path.exists(sandbox_dir): shutil.rmtree(sandbox_dir)
+
+        self._run_async(script, None, on_success_cb=on_success, sandbox=sandbox_dir)
+
+    def _run_async(self, script: str, success_msg: str | None, on_success_cb=None, sandbox: str | None = None):
+        if self.ctx.grub_apply_btn:
+            self.ctx.grub_apply_btn.setEnabled(False)
+            self.ctx.grub_apply_btn.setText("执行中，请稍候...")
+
+        def _task():
+            result = run_pkexec_shell(script, timeout=300)
+            if result.returncode != 0:
+                raise RuntimeError(result.stderr.strip() or result.stdout.strip() or "执行失败")
+            return result
+
+        worker = Worker(_task)
+        self._workers.append(worker)
+
+        def on_ok(_):
+            grub_core.cleanup_sandbox(sandbox) if sandbox else None
+            if on_success_cb:
+                on_success_cb()
+            elif success_msg:
+                QMessageBox.information(self.ctx.window, "成功", success_msg)
+                self.refresh_local_themes_combo()
+            self._restore_button(worker)
+
+        def on_err(msg: str):
+            grub_core.cleanup_sandbox(sandbox) if sandbox else None
+            if "canceled" in msg.lower() or "dismissed" in msg.lower():
+                logger.debug("grub pkexec canceled")
+            else:
+                QMessageBox.critical(self.ctx.window, "失败", f"GRUB 操作失败:\n{msg}")
+            self._restore_button(worker)
+
+        worker.finished_ok.connect(on_ok)
+        worker.finished_err.connect(on_err)
+        worker.start()
+
+    def _restore_button(self, worker: Worker):
+        if self.ctx.grub_apply_btn:
+            self.ctx.grub_apply_btn.setEnabled(True)
+            self.ctx.grub_apply_btn.setText("写入并更新 GRUB")
+        try:
+            worker.finished_ok.disconnect()
+            worker.finished_err.disconnect()
+        except Exception:
+            pass
+        if worker in self._workers:
+            self._workers.remove(worker)
+        worker.deleteLater()

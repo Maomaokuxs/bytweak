@@ -1,103 +1,163 @@
-import os
-import re
-import subprocess
 from PySide6.QtWidgets import QMessageBox
+from PySide6.QtCore import Qt
+
+from . import gpu_core
+from .utils import logger, run_pkexec_shell
+from .workers import Worker
+
+VENDOR_ICON = {
+    "NVIDIA": "󰢮",
+    "AMD": "󰍛",
+    "Intel": "",
+    "Unknown": "󰍹",
+}
+VENDOR_COLOR = {
+    "NVIDIA": "#76b900",
+    "AMD": "#ed1c24",
+    "Intel": "#0071c5",
+    "Unknown": "#6b7280",
+}
+ICON_FONT = "'JetBrainsMono Nerd Font','JetBrainsMono NF','Symbols Nerd Font'"
+
+
+def _set_codec(lbl, ok: bool, name: str):
+    if not lbl:
+        return
+    mark = "✓" if ok else "✗"
+    color = "#1a7f37" if ok else "#cf222e"
+    lbl.setText(f'<span style="color:{color}; font-weight:700;">{mark}</span> {name}')
+    lbl.setToolTip(f"{name}: {'已支持' if ok else '未支持'}")
+
 
 class GpuManager:
+    """Widgets 薄层：标签/按钮渲染 + 一键修复，探测逻辑全部走 gpu_core。"""
+
     def __init__(self, app_ctx):
         self.ctx = app_ctx
-        self.detected_vendor = "Unknown"  
+        self.detected_vendor = "Unknown"
         self.nvidia_driver_installed = False
-        self.vaapi_perfect = False 
+        self.vaapi_perfect = False
+        self._workers: list[Worker] = []
+        self._gpus: list[dict] = []
 
     def detect_gpu_and_drivers(self):
-        print("[DEBUG 硬件] 开始清点 PCI 巴士上的显卡硬件及硬件加速生态...")
-        gpu_info_text = "未侦测到主流显卡"
-        driver_status_text = "系统正处于基础渲染状态。"
+        logger.debug("detect GPU/VAAPI")
+        if getattr(self.ctx, "gpu_refresh_btn", None):
+            self.ctx.gpu_refresh_btn.setEnabled(False)
+            self.ctx.gpu_refresh_btn.setText("检测中...")
         try:
-            result = subprocess.run(["lspci"], capture_output=True, text=True, check=True)
-            lspci_out = result.stdout
-            gpus = [line for line in lspci_out.splitlines() if "VGA compatible" in line or "3D controller" in line]
-            if gpus:
-                display_gpus = []
-                for gpu in gpus:
-                    if "NVIDIA" in gpu:
-                        self.detected_vendor = "NVIDIA"
-                        match = re.search(r'\[([^\]]+)\]', gpu)
-                        display_gpus.append(f"🟢 NVIDIA [{match.group(1) if match else 'GeForce'}]")
-                    elif "Advanced Micro Devices" in gpu or "AMD" in gpu:
-                        if self.detected_vendor != "NVIDIA": self.detected_vendor = "AMD"
-                        display_gpus.append("🔴 AMD Radeon Graphics (已原生免驱)")
-                    elif "Intel" in gpu:
-                        if self.detected_vendor == "Unknown": self.detected_vendor = "Intel"
-                        display_gpus.append("🔵 Intel HD / Arc Graphics (已原生免驱)")
-                gpu_info_text = "\n".join(display_gpus)
+            self._gpus = gpu_core.detect_gpus()
+            self.detected_vendor = gpu_core.primary_vendor(self._gpus)
+            assessed = gpu_core.assess(self.detected_vendor)
+        except Exception as e:
+            logger.warning(f"detect_gpu failed: {e}")
+            self._gpus = []
+            self.detected_vendor = "Unknown"
+            assessed = {"nvidia_installed": False, "perfect": False,
+                        "status": f"检测失败: {e}", "version": "",
+                        "codec": {k: False for k in ("h264", "h265", "av1", "vp9", "nvenc", "vaapi")}}
 
-            if self.detected_vendor == "NVIDIA":
-                if os.path.exists("/proc/driver/nvidia/version"):
-                    self.nvidia_driver_installed = True
-                    driver_status_text = "NVIDIA 官方闭源驱动：【 已正确加载 】\n"
-                    vaapi_check = subprocess.run(["rpm", "-q", "libva-nvidia-driver"], capture_output=True, text=True)
-                    if vaapi_check.returncode == 0:
-                        self.vaapi_perfect = True
-                        driver_status_text += "多媒体编解码格式：【 H.264/H.265/NVENC 全格式硬解打通 】"
+        self.nvidia_driver_installed = assessed["nvidia_installed"]
+        self.vaapi_perfect = assessed["perfect"]
+        codec = assessed["codec"]
+
+        if self.ctx.gpu_action_btn:
+            if self.vaapi_perfect:
+                self.ctx.gpu_action_btn.setText("硬解状态完美，无需操作")
+                self.ctx.gpu_action_btn.setEnabled(False)
+                self.ctx.gpu_action_btn.setToolTip("所有硬解已打通，无需操作")
+            else:
+                self.ctx.gpu_action_btn.setEnabled(True)
+                if self.detected_vendor == "NVIDIA":
+                    if not self.nvidia_driver_installed:
+                        self.ctx.gpu_action_btn.setText("一键安装闭源驱动 + 硬解")
                     else:
-                        driver_status_text += "⚠️ 编解码格式受限：缺少 VA-API 桥接包，高码率录屏可能导致 CPU 飙升！"
+                        self.ctx.gpu_action_btn.setText("一键打通 VA-API / NVENC")
+                elif self.detected_vendor in ["AMD", "Intel"]:
+                    self.ctx.gpu_action_btn.setText(f"一键激活 {self.detected_vendor} 全格式硬解")
                 else:
-                    driver_status_text = "⚠️ 运行受限：检测到 NVIDIA 显卡，但正运行于开源驱动下。"
-            elif self.detected_vendor in ["AMD", "Intel"]:
-                freeworld_check = subprocess.run(["rpm", "-q", "mesa-va-drivers-freeworld"], capture_output=True, text=True)
-                if freeworld_check.returncode == 0:
-                    self.vaapi_perfect = True
-                    driver_status_text = f"{self.detected_vendor} 原生图形驱动：【 运行状态完美 】\n多媒体编解码格式：【 H.264 / H.265 专利全格式硬解已全激活 】"
-                else:
-                    driver_status_text = f"{self.detected_vendor} 原生图形驱动：【 运行状态良好 】\n⚠️ 编解码格式受限：Fedora 默认禁用了商业视频硬解！"
-
-            if self.ctx.gpu_action_btn:
-                if self.vaapi_perfect:
-                    self.ctx.gpu_action_btn.setText("🎉 当前多媒体硬解加速已处于完美状态")
+                    self.ctx.gpu_action_btn.setText("一键检测")
                     self.ctx.gpu_action_btn.setEnabled(False)
-                else:
-                    self.ctx.gpu_action_btn.setEnabled(True)
-                    if self.detected_vendor == "NVIDIA":
-                        if not self.nvidia_driver_installed: self.ctx.gpu_action_btn.setText("一键安装 NVIDIA 闭源驱动 + 打通全格式硬解")
-                        else: self.ctx.gpu_action_btn.setText("一键打通 NVENC / OBS 录屏硬件加速通道")
-                    elif self.detected_vendor in ["AMD", "Intel"]: self.ctx.gpu_action_btn.setText(f"一键激活 {self.detected_vendor} 全格式多媒体视频硬解")
-                    else: self.ctx.gpu_action_btn.setEnabled(False)
-        except Exception as e: print(e)
 
-        if self.ctx.gpu_info_lbl: self.ctx.gpu_info_lbl.setText(gpu_info_text)
-        if self.ctx.driver_status_lbl: self.ctx.driver_status_lbl.setText(driver_status_text)
+        self._render_device_list()
+        if self.ctx.driver_status_lbl:
+            self.ctx.driver_status_lbl.setText(assessed["status"])
+        if getattr(self.ctx, "gpu_driver_version_lbl", None):
+            self.ctx.gpu_driver_version_lbl.setText(assessed["version"])
+        _set_codec(getattr(self.ctx, "codec_h264_lbl", None), codec["h264"], "H.264")
+        _set_codec(getattr(self.ctx, "codec_h265_lbl", None), codec["h265"], "H.265")
+        _set_codec(getattr(self.ctx, "codec_av1_lbl", None), codec["av1"], "AV1")
+        _set_codec(getattr(self.ctx, "codec_vp9_lbl", None), codec["vp9"], "VP9")
+        nvenc_name = "NVENC" if self.detected_vendor == "NVIDIA" else "NVENC（仅 NVIDIA）"
+        _set_codec(getattr(self.ctx, "codec_nvenc_lbl", None), codec["nvenc"], nvenc_name)
+        _set_codec(getattr(self.ctx, "codec_vaapi_lbl", None), codec["vaapi"], "VA-API")
+
+        if getattr(self.ctx, "gpu_refresh_btn", None):
+            self.ctx.gpu_refresh_btn.setEnabled(True)
+            self.ctx.gpu_refresh_btn.setText("刷新检测")
+
+    def _render_device_list(self):
+        if not self.ctx.gpu_info_lbl:
+            return
+        if not self._gpus:
+            self.ctx.gpu_info_lbl.setTextFormat(Qt.PlainText)
+            self.ctx.gpu_info_lbl.setText("未侦测到主流显卡")
+            self.ctx.gpu_info_lbl.setToolTip("")
+            return
+        self.ctx.gpu_info_lbl.setTextFormat(Qt.RichText)
+        html_lines = []
+        for g in self._gpus:
+            icon = VENDOR_ICON.get(g["vendor"], VENDOR_ICON["Unknown"])
+            color = VENDOR_COLOR.get(g["vendor"], "#6b7280")
+            pci = f" <span style='font-size:12px;'>[{g['pci']}]</span>" if g["pci"] else ""
+            html_lines.append(
+                f"<span style=\"font-family:{ICON_FONT}; color:{color}; font-size:16px;\">{icon}</span>"
+                f" <b style='font-size:15px;'>{g['vendor']}</b>"
+                f" <span style='font-size:14px;'>· {g['name']}</span>{pci}"
+            )
+        self.ctx.gpu_info_lbl.setText("<br/>".join(html_lines))
+        self.ctx.gpu_info_lbl.setToolTip("\n".join(g["raw"] for g in self._gpus))
 
     def apply_gpu_codec_fix(self):
-        if self.vaapi_perfect or self.detected_vendor == "Unknown": return
-        if self.detected_vendor == "NVIDIA":
-            if not self.nvidia_driver_installed:
-                shell_script = """
-                dnf5 config-manager --set-enabled fedora-cisco-openh264 || true
-                dnf5 install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-44.noarch.rpm || true
-                dnf5 install -y https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-44.noarch.rpm || true
-                dnf5 update -y --refresh
-                dnf5 install -y akmod-nvidia xorg-x11-drv-nvidia-cuda libva-nvidia-driver nvidia-vaapi-driver
-                """
-                success_msg = "NVIDIA 闭源驱动与全格式硬解部署成功！请务必【重新启动电脑】！"
-            else:
-                shell_script = "dnf5 install -y libva-nvidia-driver nvidia-vaapi-driver gstreamer1-vaapi"
-                success_msg = "NVIDIA VA-API 高速硬解通道打通成功！"
-        elif self.detected_vendor in ["AMD", "Intel"]:
-            shell_script = """
-            dnf5 install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-44.noarch.rpm || true
-            dnf5 update -y --refresh
-            dnf5 swap -y mesa-va-drivers mesa-va-drivers-freeworld
-            dnf5 swap -y mesa-vdr-drivers mesa-vdr-drivers-freeworld
-            dnf5 install -y gstreamer1-plugins-bad-freeworld gstreamer1-plugins-ugly-freeworld ffmpeg-free-devel
-            """
-            success_msg = f"🎉 恭喜！{self.detected_vendor} 开源全格式多媒体硬解加速已彻底激活！"
-
-        QMessageBox.information(self.ctx.window, "准备整备环境", "工具即将拉起官方 Polkit 授权，请安心等候。")
-        cmd = ["pkexec", "sh", "-c", shell_script]
+        if self.vaapi_perfect or self.detected_vendor == "Unknown":
+            return
         try:
-            if subprocess.run(cmd, capture_output=True, text=True).returncode == 0:
-                QMessageBox.information(self.ctx.window, "大获全胜", success_msg)
-                self.detect_gpu_and_drivers()
-        except Exception as e: print(e)
+            shell_script, success_msg = gpu_core.build_fix_script(
+                self.detected_vendor, self.nvidia_driver_installed)
+        except RuntimeError:
+            return
+        QMessageBox.information(self.ctx.window, "准备整备环境", "工具即将拉起 Polkit 授权，请留意系统授权弹窗。授权后将在后台执行，界面不会卡死。")
+        if self.ctx.gpu_action_btn:
+            self.ctx.gpu_action_btn.setEnabled(False)
+            self.ctx.gpu_action_btn.setText("正在后台执行，请稍候...")
+        def _task():
+            result = run_pkexec_shell(shell_script, timeout=1800)
+            if result.returncode != 0:
+                raise RuntimeError(result.stderr.strip() or result.stdout.strip() or "执行失败")
+            return result
+        worker = Worker(_task)
+        self._workers.append(worker)
+        def on_ok(_):
+            QMessageBox.information(self.ctx.window, "部署成功", success_msg)
+            self.detect_gpu_and_drivers()
+            self._cleanup(worker)
+        def on_err(msg: str):
+            if "canceled" in msg.lower() or "dismissed" in msg.lower():
+                logger.debug("gpu pkexec canceled")
+            else:
+                QMessageBox.critical(self.ctx.window, "失败", f"部署失败:\n{msg}")
+            self.detect_gpu_and_drivers()
+            self._cleanup(worker)
+        worker.finished_ok.connect(on_ok)
+        worker.finished_err.connect(on_err)
+        worker.start()
+
+    def _cleanup(self, worker: Worker):
+        try:
+            worker.finished_ok.disconnect()
+            worker.finished_err.disconnect()
+        except Exception:
+            pass
+        if worker in self._workers:
+            self._workers.remove(worker)
+        worker.deleteLater()

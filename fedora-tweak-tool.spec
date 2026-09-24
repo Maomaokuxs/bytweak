@@ -35,6 +35,8 @@ mkdir -p %{buildroot}%{_datadir}/applications
 # 畅通无阻的平铺拷贝
 cp app.py %{buildroot}%{_bindir}/fedora-tweak-tool
 cp main.ui %{buildroot}%{_datadir}/fedora-tweak-tool/main.ui
+cp style.qss %{buildroot}%{_datadir}/fedora-tweak-tool/style.qss
+cp style-dark.qss %{buildroot}%{_datadir}/fedora-tweak-tool/style-dark.qss
 
 # 🌟 核心增补：将业务子模块集群及其物理目录顺滑平铺导入系统静态目录
 cp -r modules %{buildroot}%{_datadir}/fedora-tweak-tool/
@@ -55,6 +57,8 @@ echo "StartupWMClass=fedora-tweak-tool" >> %{buildroot}%{_datadir}/applications/
 # 无视 Git 原生权限，落地强制赋予 0755
 %attr(0755, root, root) %{_bindir}/fedora-tweak-tool
 %{_datadir}/fedora-tweak-tool/main.ui
+%{_datadir}/fedora-tweak-tool/style.qss
+%{_datadir}/fedora-tweak-tool/style-dark.qss
 # 🌟 声明整个子模块目录所有权（自动剔除 pycache 干扰）
 %{_datadir}/fedora-tweak-tool/modules/
 %{_datadir}/applications/fedora-tweak-tool.desktop

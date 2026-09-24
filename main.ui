@@ -2,612 +2,461 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>788</width>
-    <height>600</height>
-   </rect>
-  </property>
-  <property name="windowTitle">
-   <string>MainWindow</string>
-  </property>
+  <property name="geometry"><rect><x>0</x><y>0</y><width>980</width><height>680</height></rect></property>
+  <property name="windowTitle"><string>Fedora Tweak Tool</string></property>
+  <property name="minimumSize"><size><width>820</width><height>560</height></size></property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="contentsMargins"><rect><x>12</x><y>12</y><width>12</width><height>12</height></rect></property>
+    <property name="spacing"><number>12</number></property>
+    <!-- 顶栏 -->
+    <item>
+     <widget class="QWidget" name="header_bar">
+      <property name="maximumSize"><size><width>16777215</width><height>52</height></size></property>
+      <property name="sizePolicy"><sizepolicy hsizetype="Expanding" vsizetype="Fixed"><horstretch>0</horstretch><verstretch>0</verstretch></sizepolicy></property>
+      <layout class="QHBoxLayout" name="header_layout">
+       <property name="contentsMargins"><rect><x>4</x><y>0</y><width>4</width><height>0</height></rect></property>
+       <property name="spacing"><number>10</number></property>
+       <item>
+        <widget class="QLabel" name="app_icon_lbl">
+         <property name="text"><string>●</string></property>
+         <property name="minimumSize"><size><width>28</width><height>0</height></size></property>
+         <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="title_box">
+         <property name="spacing"><number>0</number></property>
+         <item><widget class="QLabel" name="app_title_lbl"><property name="text"><string>Fedora Tweak Tool</string></property></widget></item>
+         <item><widget class="QLabel" name="app_sub_lbl"><property name="text"><string>系统微调 · 简洁现代</string></property></widget></item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="header_spacer">
+         <property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property>
+         <property name="sizeType"><enum>QSizePolicy::Expanding</enum></property>
+        </spacer>
+       </item>
+       <item><widget class="QLabel" name="app_version_lbl"><property name="text"><string>v1.1.5</string></property></widget></item>
+      </layout>
+     </widget>
+    </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,4">
+      <property name="spacing"><number>12</number></property>
       <item>
        <widget class="QListWidget" name="nav_list">
-        <item>
-         <property name="text">
-          <string>时区设置</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>GRUB 配置</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>显卡与硬件加速</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>鼠标指针样式</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>软件源管理</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Fcitx 输入法</string>
-         </property>
-        </item>
+        <property name="minimumSize"><size><width>180</width><height>0</height></size></property>
+        <property name="maximumSize"><size><width>260</width><height>16777215</height></size></property>
+        <property name="sizePolicy"><sizepolicy hsizetype="Expanding" vsizetype="Expanding"><horstretch>1</horstretch><verstretch>0</verstretch></sizepolicy></property>
+        <property name="spacing"><number>4</number></property>
+        <property name="iconSize"><size><width>20</width><height>20</height></size></property>
+        <item><property name="text"><string>时区设置</string></property></item>
+        <item><property name="text"><string>GRUB 配置</string></property></item>
+        <item><property name="text"><string>显卡与硬件加速</string></property></item>
+        <item><property name="text"><string>鼠标指针样式</string></property></item>
+        <item><property name="text"><string>软件源管理</string></property></item>
+        <item><property name="text"><string>Fcitx 输入法</string></property></item>
        </widget>
       </item>
       <item>
        <widget class="QStackedWidget" name="content_stack">
-        <property name="currentIndex">
-         <number>5</number>
-        </property>
+        <property name="sizePolicy"><sizepolicy hsizetype="Expanding" vsizetype="Expanding"><horstretch>4</horstretch><verstretch>0</verstretch></sizepolicy></property>
+        <property name="currentIndex"><number>0</number></property>
+
+        <!-- 1 时区 -->
         <widget class="QWidget" name="page">
-         <widget class="QWidget" name="layoutWidget">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>601</width>
-            <height>531</height>
-           </rect>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_2">
-           <item>
-            <layout class="QFormLayout" name="formLayout">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label">
-               <property name="text">
-                <string>当前系统时区：</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QLabel" name="current_zone_lbl">
-               <property name="text">
-                <string>加载中...</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_2">
-               <property name="text">
-                <string>修改为：</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QComboBox" name="timezone_combo"/>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <spacer name="verticalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Orientation::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <property name="contentsMargins"><rect><x>0</x><y>0</y><width>0</width><height>0</height></rect></property>
+          <property name="spacing"><number>0</number></property>
+          <item>
+           <widget class="QScrollArea" name="scroll_tz">
+            <property name="frameShape"><enum>QFrame::NoFrame</enum></property>
+            <property name="widgetResizable"><bool>true</bool></property>
+            <property name="horizontalScrollBarPolicy"><enum>Qt::ScrollBarAlwaysOff</enum></property>
+            <widget class="QWidget" name="scrollContent_tz">
+             <layout class="QVBoxLayout" name="scrollLayout_tz">
+              <property name="contentsMargins"><rect><x>12</x><y>12</y><width>12</width><height>12</height></rect></property>
+              <property name="spacing"><number>12</number></property>
+              <item><widget class="QLabel" name="page_title_lbl"><property name="text"><string>时区设置</string></property></widget></item>
+              <item>
+               <widget class="QGroupBox" name="groupBox_tz_current">
+                <property name="title"><string>当前状态</string></property>
+                <layout class="QVBoxLayout" name="tz_current_layout">
+                 <property name="spacing"><number>6</number></property>
+                 <item><widget class="QLabel" name="current_zone_lbl"><property name="text"><string>加载中...</string></property></widget></item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="groupBox_tz_select">
+                <property name="title"><string>切换时区</string></property>
+                <layout class="QFormLayout" name="formLayout">
+                 <property name="labelAlignment"><set>Qt::AlignmentFlag::AlignRight</set></property>
+                 <property name="formAlignment"><set>Qt::AlignmentFlag::AlignLeft</set></property>
+                 <property name="horizontalSpacing"><number>12</number></property>
+                 <property name="verticalSpacing"><number>8</number></property>
+                 <item row="0" column="0"><widget class="QLabel" name="label_2"><property name="text"><string>选择时区</string></property><property name="minimumSize"><size><width>70</width><height>0</height></size></property></widget></item>
+                 <item row="0" column="1"><widget class="QComboBox" name="timezone_combo"><property name="minimumSize"><size><width>260</width><height>0</height></size></property><property name="maximumSize"><size><width>420</width><height>16777215</height></size></property><property name="sizePolicy"><sizepolicy hsizetype="Expanding" vsizetype="Fixed"><horstretch>1</horstretch></sizepolicy></property><property name="maxVisibleItems"><number>12</number></property></widget></item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_2">
+                <property name="orientation"><enum>Qt::Orientation::Vertical</enum></property>
+                <property name="sizeType"><enum>QSizePolicy::Expanding</enum></property>
+               </spacer>
+              </item>
+             </layout>
+            </widget>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="bottombar_tz">
             <layout class="QHBoxLayout" name="horizontalLayout_2">
-             <item>
-              <spacer name="horizontalSpacer">
-               <property name="orientation">
-                <enum>Qt::Orientation::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QPushButton" name="apply_btn">
-               <property name="text">
-                <string>完成</string>
-               </property>
-              </widget>
-             </item>
+             <property name="contentsMargins"><rect><x>12</x><y>0</y><width>12</width><height>12</height></rect></property>
+             <property name="spacing"><number>8</number></property>
+             <item><spacer name="horizontalSpacer"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeType"><enum>QSizePolicy::Expanding</enum></property></spacer></item>
+             <item><widget class="QPushButton" name="apply_btn"><property name="text"><string>应用</string></property><property name="minimumSize"><size><width>120</width><height>34</height></size></property></widget></item>
             </layout>
-           </item>
-          </layout>
-         </widget>
+           </widget>
+          </item>
+         </layout>
         </widget>
+
+        <!-- 2 GRUB -->
         <widget class="QWidget" name="page_2">
-         <widget class="QWidget" name="layoutWidget">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>20</y>
-            <width>601</width>
-            <height>511</height>
-           </rect>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_3">
-           <item>
-            <widget class="QLabel" name="current_grub_lbl">
-             <property name="text">
-              <string>当前正在使用的主题：正在获取...</string>
-             </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <property name="contentsMargins"><rect><x>0</x><y>0</y><width>0</width><height>0</height></rect></property>
+          <property name="spacing"><number>0</number></property>
+          <item>
+           <widget class="QScrollArea" name="scroll_grub">
+            <property name="frameShape"><enum>QFrame::NoFrame</enum></property>
+            <property name="widgetResizable"><bool>true</bool></property>
+            <property name="horizontalScrollBarPolicy"><enum>Qt::ScrollBarAlwaysOff</enum></property>
+            <widget class="QWidget" name="scrollContent_grub">
+             <layout class="QVBoxLayout" name="scrollLayout_grub">
+              <property name="contentsMargins"><rect><x>12</x><y>12</y><width>12</width><height>12</height></rect></property>
+              <property name="spacing"><number>12</number></property>
+              <item><widget class="QLabel" name="page_title_lbl"><property name="text"><string>GRUB 配置</string></property></widget></item>
+              <item>
+               <widget class="QGroupBox" name="groupBox_grub_import">
+                <property name="title"><string>安装外部主题包</string></property>
+               <layout class="QHBoxLayout" name="horizontalLayout_3">
+                <property name="spacing"><number>12</number></property>
+                 <item><widget class="QLabel" name="label_3"><property name="text"><string>主题文件</string></property><property name="minimumSize"><size><width>70</width><height>0</height></size></property></widget></item>
+                 <item><widget class="QLineEdit" name="grub_path_edit"><property name="placeholderText"><string>未选择，可直接切换本地主题</string></property></widget></item>
+                 <item><widget class="QPushButton" name="grub_browse_btn"><property name="text"><string>浏览…</string></property><property name="minimumSize"><size><width>0</width><height>34</height></size></property></widget></item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="groupBox_grub_local">
+                <property name="title"><string>本地已安装主题</string></property>
+               <layout class="QHBoxLayout" name="horizontalLayout_5">
+                <property name="spacing"><number>12</number></property>
+                 <item><widget class="QLabel" name="label_4"><property name="text"><string>选择主题</string></property><property name="minimumSize"><size><width>70</width><height>0</height></size></property></widget></item>
+                 <item><widget class="QComboBox" name="grub_theme_combo"><property name="sizePolicy"><sizepolicy hsizetype="Expanding" vsizetype="Fixed"><horstretch>1</horstretch></sizepolicy></property><property name="minimumSize"><size><width>200</width><height>0</height></size></property><property name="maximumSize"><size><width>420</width><height>16777215</height></size></property></widget></item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer">
+                <property name="orientation"><enum>Qt::Orientation::Vertical</enum></property>
+                <property name="sizeType"><enum>QSizePolicy::Expanding</enum></property>
+               </spacer>
+              </item>
+             </layout>
             </widget>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
-             <item>
-              <widget class="QLabel" name="label_3">
-               <property name="text">
-                <string>选择 GRUB 主题 ：</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="grub_path_edit"/>
-             </item>
-             <item>
-              <widget class="QPushButton" name="grub_browse_btn">
-               <property name="text">
-                <string>选择主题文件</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,0">
-             <item>
-              <widget class="QLabel" name="label_4">
-               <property name="maximumSize">
-                <size>
-                 <width>296</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>本地主题：</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QComboBox" name="grub_theme_combo"/>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <spacer name="verticalSpacer">
-             <property name="orientation">
-              <enum>Qt::Orientation::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>348</width>
-               <height>98</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="bottombar_grub">
             <layout class="QHBoxLayout" name="horizontalLayout_4">
-             <item>
-              <spacer name="horizontalSpacer_2">
-               <property name="orientation">
-                <enum>Qt::Orientation::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QPushButton" name="QPushButton">
-               <property name="text">
-                <string>刷新</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="grub_apply_btn">
-               <property name="text">
-                <string>写入并更新 GRUB</string>
-               </property>
-              </widget>
-             </item>
+             <property name="contentsMargins"><rect><x>12</x><y>0</y><width>12</width><height>12</height></rect></property>
+             <property name="spacing"><number>8</number></property>
+             <item><spacer name="horizontalSpacer_2"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeType"><enum>QSizePolicy::Expanding</enum></property></spacer></item>
+             <item><widget class="QPushButton" name="grub_refresh_btn"><property name="text"><string>刷新</string></property><property name="minimumSize"><size><width>0</width><height>34</height></size></property></widget></item>
+             <item><widget class="QPushButton" name="grub_apply_btn"><property name="text"><string>写入并更新 GRUB</string></property><property name="minimumSize"><size><width>150</width><height>34</height></size></property></widget></item>
             </layout>
-           </item>
-          </layout>
-         </widget>
+           </widget>
+          </item>
+         </layout>
         </widget>
+
+        <!-- 3 GPU -->
         <widget class="QWidget" name="page_3">
-         <widget class="QWidget" name="layoutWidget">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>40</y>
-            <width>601</width>
-            <height>481</height>
-           </rect>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_4">
-           <item>
-            <widget class="QLabel" name="gpu_info_lbl">
-             <property name="text">
-              <string>正在侦测当前硬件...</string>
-             </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <property name="contentsMargins"><rect><x>0</x><y>0</y><width>0</width><height>0</height></rect></property>
+          <property name="spacing"><number>0</number></property>
+          <item>
+           <widget class="QScrollArea" name="scroll_gpu">
+            <property name="frameShape"><enum>QFrame::NoFrame</enum></property>
+            <property name="widgetResizable"><bool>true</bool></property>
+            <property name="horizontalScrollBarPolicy"><enum>Qt::ScrollBarAlwaysOff</enum></property>
+            <widget class="QWidget" name="scrollContent_gpu">
+             <layout class="QVBoxLayout" name="gpu_scroll_layout">
+              <property name="contentsMargins"><rect><x>12</x><y>12</y><width>12</width><height>12</height></rect></property>
+              <property name="spacing"><number>12</number></property>
+              <item><widget class="QLabel" name="page_title_lbl"><property name="text"><string>显卡与硬件加速</string></property></widget></item>
+              <item>
+               <widget class="QGroupBox" name="groupBox_gpu_hw">
+                <property name="title"><string>检测到的显卡</string></property>
+                <layout class="QVBoxLayout" name="gpu_hw_layout">
+                 <property name="spacing"><number>8</number></property>
+                 <item><widget class="QLabel" name="gpu_info_lbl"><property name="text"><string>正在侦测当前硬件...</string></property><property name="wordWrap"><bool>true</bool></property><property name="TextInteractionFlags"><set>Qt::TextInteractionFlag::TextSelectableByMouse|Qt::TextInteractionFlag::TextSelectableByKeyboard</set></property></widget></item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="groupBox_gpu_driver">
+                <property name="title"><string>驱动与硬解状态</string></property>
+                <layout class="QVBoxLayout" name="gpu_driver_layout">
+                 <property name="spacing"><number>8</number></property>
+                 <item><widget class="QLabel" name="driver_status_lbl"><property name="text"><string>TextLabel</string></property><property name="wordWrap"><bool>true</bool></property><property name="TextInteractionFlags"><set>Qt::TextInteractionFlag::TextSelectableByMouse</set></property></widget></item>
+                 <item><widget class="QLabel" name="gpu_driver_version_lbl"><property name="text"><string></string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+                 <item>
+                  <widget class="QFrame" name="codec_frame">
+                   <property name="frameShape"><enum>QFrame::StyledPanel</enum></property>
+                   <layout class="QGridLayout" name="codec_grid">
+                    <property name="horizontalSpacing"><number>16</number></property>
+                    <property name="verticalSpacing"><number>8</number></property>
+                    <property name="contentsMargins"><rect><x>10</x><y>10</y><width>10</width><height>10</height></rect></property>
+                    <item row="0" column="0"><widget class="QLabel" name="codec_h264_lbl"><property name="text"><string>H.264 ○ 检测中</string></property></widget></item>
+                    <item row="0" column="1"><widget class="QLabel" name="codec_h265_lbl"><property name="text"><string>H.265 ○ 检测中</string></property></widget></item>
+                    <item row="1" column="0"><widget class="QLabel" name="codec_av1_lbl"><property name="text"><string>AV1 ○ 检测中</string></property></widget></item>
+                    <item row="1" column="1"><widget class="QLabel" name="codec_vp9_lbl"><property name="text"><string>VP9 ○ 检测中</string></property></widget></item>
+                    <item row="2" column="0"><widget class="QLabel" name="codec_nvenc_lbl"><property name="text"><string>NVENC ○ 检测中</string></property></widget></item>
+                    <item row="2" column="1"><widget class="QLabel" name="codec_vaapi_lbl"><property name="text"><string>VA-API ○ 检测中</string></property></widget></item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
             </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="driver_status_lbl">
-             <property name="text">
-              <string>TextLabel</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="verticalSpacer_3">
-             <property name="orientation">
-              <enum>Qt::Orientation::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="bottombar_gpu">
             <layout class="QHBoxLayout" name="horizontalLayout_6">
-             <item>
-              <spacer name="horizontalSpacer_3">
-               <property name="orientation">
-                <enum>Qt::Orientation::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QPushButton" name="gpu_action_btn">
-               <property name="text">
-                <string>一键安装 NVIDIA 闭源驱动</string>
-               </property>
-              </widget>
-             </item>
+             <property name="contentsMargins"><rect><x>12</x><y>0</y><width>12</width><height>12</height></rect></property>
+             <property name="spacing"><number>8</number></property>
+             <item><widget class="QPushButton" name="gpu_refresh_btn"><property name="text"><string>刷新检测</string></property><property name="minimumSize"><size><width>0</width><height>34</height></size></property></widget></item>
+             <item><spacer name="horizontalSpacer_3"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeType"><enum>QSizePolicy::Expanding</enum></property></spacer></item>
+             <item><widget class="QPushButton" name="gpu_action_btn"><property name="text"><string>一键修复硬解</string></property><property name="minimumSize"><size><width>180</width><height>34</height></size></property></widget></item>
             </layout>
-           </item>
-          </layout>
-         </widget>
+           </widget>
+          </item>
+         </layout>
         </widget>
+
+        <!-- 4 鼠标 -->
         <widget class="QWidget" name="page_4">
-         <widget class="QWidget" name="layoutWidget">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>29</y>
-            <width>601</width>
-            <height>501</height>
-           </rect>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_5">
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_8">
-             <item>
-              <widget class="QLabel" name="label_5">
-               <property name="text">
-                <string>选择鼠标主题 ：</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="cursor_path_edit"/>
-             </item>
-             <item>
-              <widget class="QPushButton" name="cursor_browse_btn">
-               <property name="text">
-                <string>选择主题文件</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_7">
-             <item>
-              <widget class="QLabel" name="label_6">
-               <property name="text">
-                <string>当前主题：</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QComboBox" name="cursor_theme_combo"/>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QLabel" name="cursor_preview_lbl">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
-             </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <property name="contentsMargins"><rect><x>0</x><y>0</y><width>0</width><height>0</height></rect></property>
+          <property name="spacing"><number>0</number></property>
+          <item>
+           <widget class="QScrollArea" name="scroll_cursor">
+            <property name="frameShape"><enum>QFrame::NoFrame</enum></property>
+            <property name="widgetResizable"><bool>true</bool></property>
+            <property name="horizontalScrollBarPolicy"><enum>Qt::ScrollBarAlwaysOff</enum></property>
+            <widget class="QWidget" name="scrollContent_cursor">
+             <layout class="QVBoxLayout" name="cursor_select_layout">
+              <property name="contentsMargins"><rect><x>12</x><y>12</y><width>12</width><height>12</height></rect></property>
+              <property name="spacing"><number>12</number></property>
+              <item><widget class="QLabel" name="page_title_lbl"><property name="text"><string>鼠标指针样式</string></property></widget></item>
+              <item>
+               <widget class="QGroupBox" name="groupBox_cursor_import">
+                <property name="title"><string>导入外部主题</string></property>
+               <layout class="QHBoxLayout" name="horizontalLayout_8">
+                <property name="spacing"><number>12</number></property>
+                 <item><widget class="QLabel" name="label_5"><property name="text"><string>主题文件</string></property><property name="minimumSize"><size><width>70</width><height>0</height></size></property></widget></item>
+                 <item><widget class="QLineEdit" name="cursor_path_edit"><property name="placeholderText"><string>*.tar.gz / *.zip</string></property></widget></item>
+                 <item><widget class="QPushButton" name="btn_browse_cursor"><property name="text"><string>浏览…</string></property><property name="minimumSize"><size><width>0</width><height>34</height></size></property></widget></item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="groupBox_cursor_select">
+                <property name="title"><string>本地主题与预览</string></property>
+                <layout class="QVBoxLayout" name="cursor_inner_layout">
+                 <property name="spacing"><number>10</number></property>
+                 <item>
+                 <layout class="QHBoxLayout" name="_compat_cursor_row">
+                  <property name="spacing"><number>12</number></property>
+                   <item><widget class="QLabel" name="label_6"><property name="text"><string>当前主题</string></property><property name="minimumSize"><size><width>70</width><height>0</height></size></property></widget></item>
+                   <item><widget class="QComboBox" name="cursor_theme_combo"><property name="sizePolicy"><sizepolicy hsizetype="Expanding" vsizetype="Fixed"><horstretch>1</horstretch></sizepolicy></property><property name="minimumSize"><size><width>200</width><height>0</height></size></property><property name="maximumSize"><size><width>420</width><height>16777215</height></size></property></widget></item>
+                  </layout>
+                 </item>
+                 <item><widget class="QLabel" name="cursor_preview_lbl"><property name="minimumSize"><size><width>160</width><height>88</height></size></property><property name="maximumSize"><size><width>16777215</width><height>160</height></size></property><property name="sizePolicy"><sizepolicy hsizetype="Expanding" vsizetype="Fixed"><horstretch>1</horstretch><verstretch>0</verstretch></sizepolicy></property><property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property></widget></item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_4">
+                <property name="orientation"><enum>Qt::Orientation::Vertical</enum></property>
+                <property name="sizeType"><enum>QSizePolicy::Expanding</enum></property>
+               </spacer>
+              </item>
+             </layout>
             </widget>
-           </item>
-           <item>
-            <spacer name="verticalSpacer_4">
-             <property name="orientation">
-              <enum>Qt::Orientation::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="bottombar_cursor">
             <layout class="QHBoxLayout" name="horizontalLayout_9">
-             <item>
-              <spacer name="horizontalSpacer_4">
-               <property name="orientation">
-                <enum>Qt::Orientation::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QPushButton" name="cursor_apply_btn">
-               <property name="text">
-                <string>应用</string>
-               </property>
-              </widget>
-             </item>
+             <property name="contentsMargins"><rect><x>12</x><y>0</y><width>12</width><height>12</height></rect></property>
+             <property name="spacing"><number>8</number></property>
+             <item><spacer name="horizontalSpacer_4"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeType"><enum>QSizePolicy::Expanding</enum></property></spacer></item>
+             <item><widget class="QPushButton" name="btn_apply_cursor"><property name="text"><string>应用</string></property><property name="minimumSize"><size><width>120</width><height>34</height></size></property></widget></item>
             </layout>
-           </item>
-          </layout>
-         </widget>
+           </widget>
+          </item>
+         </layout>
         </widget>
+
+        <!-- 5 软件源 -->
         <widget class="QWidget" name="page_5">
-         <widget class="QWidget" name="layoutWidget">
-          <property name="geometry">
-           <rect>
-            <x>2</x>
-            <y>0</y>
-            <width>601</width>
-            <height>521</height>
-           </rect>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_6">
-           <item>
-            <widget class="QLabel" name="label_7">
-             <property name="text">
-              <string>当前系统已部署的仓库</string>
-             </property>
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <property name="contentsMargins"><rect><x>0</x><y>0</y><width>0</width><height>0</height></rect></property>
+          <property name="spacing"><number>0</number></property>
+          <item>
+           <widget class="QScrollArea" name="scroll_repo">
+            <property name="frameShape"><enum>QFrame::NoFrame</enum></property>
+            <property name="widgetResizable"><bool>true</bool></property>
+            <property name="horizontalScrollBarPolicy"><enum>Qt::ScrollBarAlwaysOff</enum></property>
+            <widget class="QWidget" name="scrollContent_repo">
+             <layout class="QVBoxLayout" name="repo_scroll_layout" stretch="0,3,1">
+              <property name="contentsMargins"><rect><x>12</x><y>12</y><width>12</width><height>12</height></rect></property>
+              <property name="spacing"><number>12</number></property>
+              <item><widget class="QLabel" name="page_title_lbl"><property name="text"><string>软件源管理</string></property></widget></item>
+              <item>
+               <widget class="QGroupBox" name="groupBox_repo_system">
+                <property name="title"><string>当前系统已部署的仓库</string></property>
+                <layout class="QVBoxLayout" name="repo_system_layout">
+                 <property name="contentsMargins"><rect><x>8</x><y>8</y><width>8</width><height>8</height></rect></property>
+                 <property name="spacing"><number>6</number></property>
+                 <item><widget class="QListWidget" name="repo_list_widget"><property name="minimumSize"><size><width>0</width><height>180</height></size></property><property name="sizePolicy"><sizepolicy hsizetype="Expanding" vsizetype="Expanding"><horstretch>1</horstretch><verstretch>3</verstretch></sizepolicy></property><property name="alternatingRowColors"><bool>true</bool></property></widget></item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="groupBox_repo_recommended">
+                <property name="title"><string>推荐仓库</string></property>
+                <layout class="QVBoxLayout" name="repo_rec_layout">
+                 <property name="contentsMargins"><rect><x>8</x><y>8</y><width>8</width><height>8</height></rect></property>
+                 <property name="spacing"><number>6</number></property>
+                 <item><widget class="QListWidget" name="recommended_repo_list"><property name="minimumSize"><size><width>0</width><height>110</height></size></property><property name="maximumSize"><size><width>16777215</width><height>160</height></size></property><property name="sizePolicy"><sizepolicy hsizetype="Expanding" vsizetype="Expanding"><horstretch>1</horstretch><verstretch>1</verstretch></sizepolicy></property></widget></item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
             </widget>
-           </item>
-           <item>
-            <widget class="QListWidget" name="repo_list_widget"/>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_8">
-             <property name="text">
-              <string>推荐仓库</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QListWidget" name="recommended_repo_list"/>
-           </item>
-           <item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="bottombar_repo">
             <layout class="QHBoxLayout" name="horizontalLayout_10">
-             <item>
-              <spacer name="horizontalSpacer_5">
-               <property name="orientation">
-                <enum>Qt::Orientation::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QPushButton" name="repo_refresh_btn">
-               <property name="text">
-                <string>刷新</string>
-               </property>
-              </widget>
-             </item>
+             <property name="contentsMargins"><rect><x>12</x><y>0</y><width>12</width><height>12</height></rect></property>
+             <property name="spacing"><number>8</number></property>
+             <item><spacer name="horizontalSpacer_5"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeType"><enum>QSizePolicy::Expanding</enum></property></spacer></item>
+             <item><widget class="QPushButton" name="repo_refresh_btn"><property name="text"><string>刷新</string></property><property name="minimumSize"><size><width>0</width><height>34</height></size></property></widget></item>
             </layout>
-           </item>
-          </layout>
-         </widget>
+           </widget>
+          </item>
+         </layout>
         </widget>
+
+        <!-- 6 Fcitx -->
         <widget class="QWidget" name="page_6">
-         <widget class="QWidget" name="layoutWidget">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>29</y>
-            <width>601</width>
-            <height>501</height>
-           </rect>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_7">
-           <item>
-            <widget class="QLabel" name="fcitx_current_theme_lbl">
-             <property name="text">
-              <string>当前输入法主题：正在获取...</string>
-             </property>
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <property name="contentsMargins"><rect><x>0</x><y>0</y><width>0</width><height>0</height></rect></property>
+          <property name="spacing"><number>0</number></property>
+          <item>
+           <widget class="QScrollArea" name="scroll_fcitx">
+            <property name="frameShape"><enum>QFrame::NoFrame</enum></property>
+            <property name="widgetResizable"><bool>true</bool></property>
+            <property name="horizontalScrollBarPolicy"><enum>Qt::ScrollBarAlwaysOff</enum></property>
+            <widget class="QWidget" name="scrollContent_fcitx">
+             <layout class="QVBoxLayout" name="fcitx_scroll_layout">
+              <property name="contentsMargins"><rect><x>12</x><y>12</y><width>12</width><height>12</height></rect></property>
+              <property name="spacing"><number>12</number></property>
+              <item><widget class="QLabel" name="page_title_lbl"><property name="text"><string>Fcitx 输入法</string></property></widget></item>
+              <item>
+               <widget class="QGroupBox" name="groupBox_fcitx_status">
+                <property name="title"><string>当前主题</string></property>
+                <layout class="QVBoxLayout" name="fcitx_status_layout">
+                 <property name="spacing"><number>6</number></property>
+                 <item><widget class="QLabel" name="fcitx_current_theme_lbl"><property name="text"><string>当前输入法主题：正在获取...</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="groupBox_fcitx_import">
+                <property name="title"><string>导入主题包</string></property>
+               <layout class="QHBoxLayout" name="horizontalLayout_11">
+                <property name="spacing"><number>12</number></property>
+                 <item><widget class="QLabel" name="label_9"><property name="text"><string>文件</string></property><property name="minimumSize"><size><width>70</width><height>0</height></size></property></widget></item>
+                 <item><widget class="QLineEdit" name="fcitx_path_edit"><property name="placeholderText"><string>*.tar.gz / *.zip</string></property></widget></item>
+                 <item><widget class="QPushButton" name="fcitx_browse_btn"><property name="text"><string>浏览…</string></property><property name="minimumSize"><size><width>0</width><height>34</height></size></property></widget></item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="groupBox_fcitx_themes">
+                <property name="title"><string>主题选择</string></property>
+                <layout class="QVBoxLayout" name="fcitx_themes_layout">
+                 <property name="spacing"><number>10</number></property>
+                 <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_12">
+                  <property name="spacing"><number>12</number></property>
+                   <item><widget class="QLabel" name="label_10"><property name="text"><string>浅色主题</string></property><property name="minimumSize"><size><width>70</width><height>0</height></size></property></widget></item>
+                   <item><widget class="QComboBox" name="fcitx_theme_combo"><property name="sizePolicy"><sizepolicy hsizetype="Expanding" vsizetype="Fixed"><horstretch>1</horstretch></sizepolicy></property><property name="maximumSize"><size><width>420</width><height>16777215</height></size></property></widget></item>
+                  </layout>
+                 </item>
+                 <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_14">
+                  <property name="spacing"><number>12</number></property>
+                   <item><widget class="QLabel" name="label_11"><property name="text"><string>深色主题</string></property><property name="minimumSize"><size><width>70</width><height>0</height></size></property></widget></item>
+                   <item><widget class="QComboBox" name="fcitx_dark_theme_combo"><property name="sizePolicy"><sizepolicy hsizetype="Expanding" vsizetype="Fixed"><horstretch>1</horstretch></sizepolicy></property><property name="maximumSize"><size><width>420</width><height>16777215</height></size></property></widget></item>
+                  </layout>
+                 </item>
+                 <item><widget class="QCheckBox" name="fcitx_auto_switch_check"><property name="text"><string>根据系统配色自动切换深色/浅色主题</string></property></widget></item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_5">
+                <property name="orientation"><enum>Qt::Orientation::Vertical</enum></property>
+                <property name="sizeType"><enum>QSizePolicy::Expanding</enum></property>
+               </spacer>
+              </item>
+             </layout>
             </widget>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_11">
-             <item>
-              <widget class="QLabel" name="label_9">
-               <property name="text">
-                <string>导入主题包：</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="fcitx_path_edit"/>
-             </item>
-             <item>
-              <widget class="QPushButton" name="fcitx_browse_btn">
-               <property name="text">
-                <string>选择主题文件</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_12">
-             <item>
-              <widget class="QLabel" name="label_10">
-               <property name="text">
-                <string>浅色主题：</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QComboBox" name="fcitx_theme_combo"/>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_14">
-             <item>
-              <widget class="QLabel" name="label_11">
-               <property name="text">
-                <string>深色主题：</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QComboBox" name="fcitx_dark_theme_combo"/>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="fcitx_auto_switch_check">
-             <property name="text">
-              <string>根据系统配色自动切换深色/浅色主题</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="fcitx_preview_lbl">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="verticalSpacer_5">
-             <property name="orientation">
-              <enum>Qt::Orientation::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="bottombar_fcitx">
             <layout class="QHBoxLayout" name="horizontalLayout_13">
-             <item>
-              <spacer name="horizontalSpacer_6">
-               <property name="orientation">
-                <enum>Qt::Orientation::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QPushButton" name="fcitx_refresh_btn">
-               <property name="text">
-                <string>刷新</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="fcitx_apply_btn">
-               <property name="text">
-                <string>应用</string>
-               </property>
-              </widget>
-             </item>
+             <property name="contentsMargins"><rect><x>12</x><y>0</y><width>12</width><height>12</height></rect></property>
+             <property name="spacing"><number>8</number></property>
+             <item><spacer name="horizontalSpacer_6"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeType"><enum>QSizePolicy::Expanding</enum></property></spacer></item>
+             <item><widget class="QPushButton" name="fcitx_refresh_btn"><property name="text"><string>刷新</string></property><property name="minimumSize"><size><width>0</width><height>34</height></size></property></widget></item>
+             <item><widget class="QPushButton" name="fcitx_apply_btn"><property name="text"><string>应用</string></property><property name="minimumSize"><size><width>120</width><height>34</height></size></property></widget></item>
             </layout>
-           </item>
-          </layout>
-         </widget>
+           </widget>
+          </item>
+         </layout>
         </widget>
+
        </widget>
       </item>
      </layout>
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>788</width>
-     <height>31</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
  <connections/>
