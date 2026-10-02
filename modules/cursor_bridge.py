@@ -1,10 +1,12 @@
 """光标 QML 桥接：cursor_core 主题管理 + 预览图经 ImageProvider 供给 QML。"""
+import time
+
 from PySide6.QtCore import QObject, Signal, Property, Slot, QUrl
 from PySide6.QtGui import QImage
 from PySide6.QtQuick import QQuickImageProvider
 
 from . import cursor_core
-from .utils import logger
+from .utils import logger, log_operation
 
 
 class CursorPreviewProvider(QQuickImageProvider):
@@ -115,6 +117,7 @@ class CursorBridge(QObject):
 
     @Slot()
     def apply(self):
+        start = time.monotonic()
         if self._file_path:
             try:
                 name = cursor_core.import_archive(self._file_path)
@@ -122,8 +125,10 @@ class CursorBridge(QObject):
                 self._setFilePath("")
                 self.refresh()
                 self.message.emit("成功", f"外部鼠标主题 【{name}】 导入并应用成功！", False)
+                log_operation(f"鼠标/导入主题 {name}", True, time.monotonic() - start)
             except Exception as e:
                 self.message.emit("导入失败", str(e), True)
+                log_operation("鼠标/导入主题", False, time.monotonic() - start, str(e))
             return
         if not (0 <= self._current_index < len(self._themes)):
             self.message.emit("提示", "请选择本地鼠标主题，或导入外部压缩包！", True)
@@ -133,8 +138,10 @@ class CursorBridge(QObject):
             cursor_core.apply_theme(target)
             self._render_preview()
             self.message.emit("切换成功", f"鼠标主题已成功切换为 【{target}】！", False)
+            log_operation(f"鼠标/切换 {target}", True, time.monotonic() - start)
         except Exception as e:
             self.message.emit("失败", str(e), True)
+            log_operation(f"鼠标/切换 {target}", False, time.monotonic() - start, str(e))
 
     def _render_preview(self, cols: int = 8):
         try:

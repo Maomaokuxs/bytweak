@@ -1,8 +1,10 @@
 """桌面组件 QML 桥接：desktop_core 探测切换（用户态进程操作，无需提权）。"""
+import time
+
 from PySide6.QtCore import QObject, Signal, Property, Slot
 
 from . import desktop_core
-from .utils import logger
+from .utils import logger, log_operation
 
 
 def _options_with_index(options, current):
@@ -105,6 +107,7 @@ class DesktopBridge(QObject):
 
     @Slot()
     def applyAll(self):
+        start = time.monotonic()
         if not (0 <= self._notif_index < len(self._notif_items)):
             self._say("先选一个通知管理器")
             return
@@ -120,3 +123,4 @@ class DesktopBridge(QObject):
             extra = "；" + desktop_core.sync_niri_autostart(bar_key)
         self.refresh()
         self._say(f"{msg}；{msg2}{extra}")
+        log_operation(f"桌面/切换 通知={notif_key} 顶栏={bar_key}", True, time.monotonic() - start)

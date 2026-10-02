@@ -23,14 +23,10 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
         clip: true
-        Item {
+        padding: 16
+        ColumnLayout {
             width: gpuScroll.availableWidth
-            height: innerCol.implicitHeight + 32
-            ColumnLayout {
-                id: innerCol
-                anchors.fill: parent
-                anchors.margins: 16
-                spacing: 12
+            spacing: 12
 
                 Label { text: "显卡与硬件加速"; font.pixelSize: 22; font.bold: true; renderType: Text.NativeRendering }
 
@@ -112,7 +108,6 @@ ColumnLayout {
                         }
                     }
                 }
-            }
         }
     }
 

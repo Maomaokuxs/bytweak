@@ -23,14 +23,10 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
         clip: true
-        Item {
+        padding: 16
+        ColumnLayout {
             width: tzScroll.availableWidth
-            height: innerCol.implicitHeight + 32
-            ColumnLayout {
-                id: innerCol
-                anchors.fill: parent
-                anchors.margins: 16
-                spacing: 12
+            spacing: 12
 
                 Label { text: "时区设置"; font.pixelSize: 22; font.bold: true; renderType: Text.NativeRendering }
 
@@ -50,6 +46,7 @@ ColumnLayout {
                             spacing: 12
                             Label { text: "选择时区"; Layout.preferredWidth: 80 }
                             ComboBox {
+                                id: tzCombo
                                 Layout.fillWidth: true
                                 Layout.maximumWidth: 420
                                 editable: true
@@ -70,7 +67,6 @@ ColumnLayout {
                         }
                     }
                 }
-            }
         }
     }
 
@@ -88,7 +84,11 @@ ColumnLayout {
             highlighted: true
             enabled: !tz.busy
             Layout.preferredWidth: 120
-            onClicked: tz.apply()
+            onClicked: {
+                if (tzCombo.displayText && !tz.setZoneByName(tzCombo.displayText))
+                    return
+                tz.apply()
+            }
         }
     }
 

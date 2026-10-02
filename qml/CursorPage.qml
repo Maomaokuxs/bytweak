@@ -32,14 +32,10 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
         clip: true
-        Item {
+        padding: 16
+        ColumnLayout {
             width: cursorScroll.availableWidth
-            height: innerCol.implicitHeight + 32
-            ColumnLayout {
-                id: innerCol
-                anchors.fill: parent
-                anchors.margins: 16
-                spacing: 12
+            spacing: 12
 
                 Label { text: "鼠标指针样式"; font.pixelSize: 22; font.bold: true; renderType: Text.NativeRendering }
 
@@ -101,7 +97,6 @@ ColumnLayout {
                         Label { text: cursor.previewInfo; opacity: 0.6 }
                     }
                 }
-            }
         }
     }
 

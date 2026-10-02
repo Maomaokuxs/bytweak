@@ -121,35 +121,50 @@ def _load_xcur_pixmap(cursor_file: str) -> QPixmap | None:
 
 
 def render_preview(theme_name: str, cols: int = 8) -> tuple[QImage, int, int]:
-    """渲染主题预览横条；返回 (QImage, 已绘制数, 计划数)。无素材返回空图与 0。"""
-    slots = CURSOR_SLOTS[: max(1, cols)]
+    """渲染主题预览横条；返回 (QImage, 已绘制数, 计划数)。无素材返回空图与 0。
+    主题包内大量使用符号链接/硬链接（如 pointer/hand1/hand2 常指向同一文件），
+    按 (st_dev, st_ino) 去重后再取前 cols 个，保证 8 格各不相同。"""
+    want = max(1, cols)
     theme_path = resolve_theme_dir(theme_name)
-    pixmaps: list[QPixmap | None] = [None] * len(slots)
+    pixmaps: list[QPixmap] = []
+    seen: set[tuple[int, int]] = set()
     if theme_path:
         cursors_dir = os.path.join(theme_path, "cursors")
         if os.path.isdir(cursors_dir):
-            for i, fallbacks in enumerate(slots):
+            for fallbacks in CURSOR_SLOTS:
+                if len(pixmaps) >= want:
+                    break
                 for name in fallbacks:
                     b_path = os.path.join(cursors_dir, name)
-                    if os.path.lexists(b_path):
-                        pixmaps[i] = _load_xcur_pixmap(b_path)
-                        break
-    drawn = sum(1 for p in pixmaps if p is not None)
-    canvas = QPixmap(cols * CELL, CELL)
+                    if not os.path.lexists(b_path):
+                        continue
+                    try:
+                        st = os.stat(os.path.realpath(b_path))
+                        key = (st.st_dev, st.st_ino)
+                    except OSError:
+                        continue
+                    if key in seen:
+                        continue  # 同文件已展示过，试本槽位下一个别名
+                    pix = _load_xcur_pixmap(b_path)
+                    if pix is None:
+                        continue
+                    seen.add(key)
+                    pixmaps.append(pix)
+                    break
+    drawn = len(pixmaps)
+    canvas = QPixmap(want * CELL, CELL)
     canvas.fill(Qt.transparent)
     if drawn:
         painter = QPainter(canvas)
         painter.setRenderHint(QPainter.Antialiasing)
         painter.setRenderHint(QPainter.SmoothPixmapTransform)
         for i, pix in enumerate(pixmaps):
-            if pix is None:
-                continue
             scaled = pix.scaled(ICON, ICON, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             x = i * CELL + (CELL - scaled.width()) // 2
             y = (CELL - scaled.height()) // 2
             painter.drawPixmap(x, y, scaled)
         painter.end()
-    return canvas.toImage(), drawn, len(slots)
+    return canvas.toImage(), drawn, want
 
 
 def apply_theme(theme_name: str):

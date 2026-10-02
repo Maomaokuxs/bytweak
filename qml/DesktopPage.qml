@@ -11,14 +11,10 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
         clip: true
-        Item {
+        padding: 16
+        ColumnLayout {
             width: deskScroll.availableWidth
-            height: innerCol.implicitHeight + 32
-            ColumnLayout {
-                id: innerCol
-                anchors.fill: parent
-                anchors.margins: 16
-                spacing: 12
+            spacing: 12
 
                 Label { text: "桌面组件"; font.pixelSize: 22; font.bold: true; renderType: Text.NativeRendering }
 
@@ -69,7 +65,6 @@ ColumnLayout {
                     Item { Layout.fillWidth: true }
                     Button { text: "刷新状态"; flat: true; onClicked: desk.refresh() }
                 }
-            }
         }
     }
 

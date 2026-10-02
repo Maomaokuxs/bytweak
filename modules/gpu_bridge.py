@@ -157,7 +157,7 @@ class GpuBridge(QObject):
                 raise RuntimeError(result.stderr.strip() or result.stdout.strip() or "执行失败")
             return result
 
-        worker = Worker(_task)
+        worker = Worker(_task, label=f"显卡/部署 {self._vendor}", timeout=1920)
         self._workers.append(worker)
 
         def on_ok(_):
@@ -185,4 +185,6 @@ class GpuBridge(QObject):
             pass
         if worker in self._workers:
             self._workers.remove(worker)
-        worker.deleteLater()
+        # 超时线程任其自生自灭：不再触碰，避免销毁仍在运行的线程导致崩溃
+        if not getattr(worker, "timed_out", False):
+            worker.deleteLater()

@@ -11,9 +11,11 @@ Source0:        {{{ git_dir_pack }}}
 
 BuildArch:      noarch
 Requires:       python3-pyside6
+Requires:       python3-libdnf5
 Requires:       polkit
 Requires:       grub2-tools
 Requires:       pciutils
+Requires:       flatpak
 
 %description
 一个为 Fedora 打造的系统调节工具，目前支持免核心破坏的系统时区修改，

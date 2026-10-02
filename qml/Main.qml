@@ -13,8 +13,51 @@ ApplicationWindow {
     minimumHeight: 560
     title: "Fedora Tweak Tool"
 
-    // 极简导航：竖线条 + 文字 + 选中阴影衬底
-    property var navModel: ["总览", "时区设置", "GRUB 配置", "显卡与硬件加速", "鼠标指针样式", "软件源管理", "Fcitx 输入法", "桌面组件"]
+    // 极简导航：竖线条 + 文字 + 选中阴影衬底（附关键字供搜索过滤）
+    property var navFull: [
+        { "name": "总览", "page": 0, "keys": "总览 首页 概览 状态 仪表盘 主机 内存 硬盘 home dashboard" },
+        { "name": "时区设置", "page": 1, "keys": "时区 时间 时钟 日期 timezone" },
+        { "name": "GRUB 配置", "page": 2, "keys": "grub 引导 开机 启动菜单 主题 boot" },
+        { "name": "显卡与硬件加速", "page": 3, "keys": "显卡 gpu 驱动 硬解 编解码 nvidia amd intel 加速" },
+        { "name": "鼠标指针样式", "page": 4, "keys": "鼠标 指针 光标 主题 mouse cursor" },
+        { "name": "软件包管理", "page": 5, "keys": "软件包 安装 copr 软件源 仓库 rpm fusion repo dnf" },
+        { "name": "Fcitx 输入法", "page": 6, "keys": "输入法 拼音 主题 fcitx input" },
+        { "name": "桌面组件", "page": 7, "keys": "桌面 通知 顶栏 waybar quickshell mako dunst 自启 niri" },
+        { "name": "niri 快捷键", "page": 8, "keys": "niri 快捷键 键位 热键 按键 hotkey keybind 快捷键位" },
+        { "name": "服务管理", "page": 9, "keys": "服务 自启 开机 systemctl systemd service 启动 停止" },
+        { "name": "Flatpak 管理", "page": 10, "keys": "flatpak 应用 沙盒 flathub 安装 卸载 更新" },
+        { "name": "DNF 调优", "page": 11, "keys": "dnf 调优 下载 镜像 缓存 并行 fastestmirror" }
+    ]
+
+    function filterNav(q) {
+        q = q.trim().toLowerCase()
+        var res = []
+        for (var i = 0; i < navFull.length; i++) {
+            var e = navFull[i]
+            if (!q || e.name.toLowerCase().indexOf(q) !== -1 || e.keys.toLowerCase().indexOf(q) !== -1)
+                res.push(e)
+        }
+        nav.model = res
+        syncNavHighlight()
+    }
+
+    function syncNavHighlight() {
+        for (var j = 0; j < nav.count; j++) {
+            if (nav.model[j].page === stack.currentIndex) {
+                nav.currentIndex = j
+                return
+            }
+        }
+        nav.currentIndex = -1
+    }
+
+    function gotoPage(page) {
+        if (searchField.displayText !== "")
+            searchField.clear()
+        searchField.focus = false
+        stack.currentIndex = page
+        syncNavHighlight()
+    }
 
     // 切页过渡：新页淡入 + 微缩回弹（只作用于进入页；
     // StackLayout 自动隐藏旧页，结构上不可能重叠；scale 是渲染变换，不影响布局）
@@ -42,12 +85,52 @@ ApplicationWindow {
         anchors.margins: 12
         spacing: 12
 
+        Shortcut {
+            sequence: "Ctrl+K"
+            context: Qt.ApplicationShortcut
+            onActivated: searchField.forceActiveFocus()
+        }
+
+        ColumnLayout {
+            Layout.preferredWidth: 200
+            Layout.maximumWidth: 200
+            Layout.fillHeight: true
+            spacing: 8
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 6
+                TextField {
+                    id: searchField
+                    Layout.fillWidth: true
+                    placeholderText: "搜索设置…"
+                    onTextChanged: root.filterNav(text)
+                    Keys.onEscapePressed: {
+                        clear()
+                        focus = false
+                    }
+                }
+                ToolButton {
+                    text: "✕"
+                    flat: true
+                    visible: searchField.displayText !== ""
+                    onClicked: searchField.clear()
+                }
+            }
+
+            Label {
+                text: "无匹配设置"
+                opacity: 0.6
+                horizontalAlignment: Text.AlignHCenter
+                Layout.fillWidth: true
+                visible: nav.count === 0
+            }
+
         ListView {
             id: nav
-            Layout.preferredWidth: 180
-            Layout.maximumWidth: 260
+            Layout.fillWidth: true
             Layout.fillHeight: true
-            model: root.navModel
+            model: root.navFull
             currentIndex: 0
             spacing: 4
             delegate: ItemDelegate {
@@ -56,12 +139,12 @@ ApplicationWindow {
                 topPadding: 11
                 bottomPadding: 11
                 highlighted: ListView.isCurrentItem
-                onClicked: nav.currentIndex = index
+                onClicked: root.gotoPage(modelData.page)
                 background: Rectangle {
                     radius: 8
-                    color: navDelegate.highlighted ? theme.accent : "transparent"
+                    color: theme.accent
                     opacity: navDelegate.highlighted ? 0.12 : 0.0
-                    layer.enabled: navDelegate.highlighted
+                    layer.enabled: true
                     layer.effect: MultiEffect {
                         shadowEnabled: true
                         shadowColor: "#1a000000"
@@ -70,7 +153,9 @@ ApplicationWindow {
                         shadowVerticalOffset: 2
                         blurMax: 16
                     }
-                    Behavior on opacity { NumberAnimation { duration: 140 } }
+                    Behavior on opacity {
+                        NumberAnimation { duration: 260; easing.type: Easing.InOutQuad }
+                    }
                 }
                 contentItem: RowLayout {
                     spacing: 10
@@ -79,22 +164,44 @@ ApplicationWindow {
                         Layout.fillHeight: true
                         radius: 1.5
                         color: navDelegate.highlighted ? theme.accent : "transparent"
+                        Behavior on color {
+                            ColorAnimation { duration: 260; easing.type: Easing.InOutQuad }
+                        }
                     }
                     Label {
-                        text: modelData
+                        text: modelData.name
                         color: navDelegate.highlighted ? theme.accent : theme.textMain
                         font.bold: navDelegate.highlighted
                         renderType: Text.NativeRendering
                         Layout.fillWidth: true
                         verticalAlignment: Text.AlignVCenter
+                        Behavior on color {
+                            ColorAnimation { duration: 260; easing.type: Easing.InOutQuad }
+                        }
                     }
                 }
             }
         }
+        }
 
         Connections {
             target: dash
-            function onNavigate(index) { nav.currentIndex = index }
+            function onNavigate(index) { root.gotoPage(index) }
+        }
+
+        AppDialog { id: sysWarnDlg }
+
+        Component.onCompleted: {
+            if (dash.isAtomic) {
+                root.navFull = root.navFull.filter(function (e) { return e.page !== 11 })
+                nav.model = root.navFull
+                syncNavHighlight()
+            }
+            if (!dash.isFedora) {
+                sysWarnDlg.title = "系统不受支持"
+                sysWarnDlg.body = "检测到当前系统为“" + dash.osName + "”，本工具专为 Fedora 设计，部分功能可能不可用或执行失败。"
+                sysWarnDlg.open()
+            }
         }
 
         // 内容阴影卡片底
@@ -121,7 +228,7 @@ ApplicationWindow {
             StackLayout {
                 id: stack
                 anchors.fill: parent
-                currentIndex: nav.currentIndex
+                currentIndex: 0
 
                 DashboardPage {}
                 TimezonePage {}
@@ -131,6 +238,10 @@ ApplicationWindow {
                 RepoPage {}
                 FcitxPage {}
                 DesktopPage {}
+                NiriKeysPage {}
+                ServicePage {}
+                FlatpakPage {}
+                DnfPage {}
 
                 onCurrentIndexChanged: {
                     const page = stack.children[stack.currentIndex]

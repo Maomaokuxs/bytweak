@@ -3,11 +3,15 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // 统一样式消息弹窗：白卡 + 标题 + 正文 + 右下实心确定钮
+// details 非空时左下出现“查看输出”，展开显示等宽详情文本（如命令完整输出）
 Dialog {
     id: root
     anchors.centerIn: parent
     modal: true
     property alias body: bodyLabel.text
+    property string details: ""
+    property bool showDetails: false
+    onOpened: showDetails = false
 
     background: Rectangle {
         color: theme.popupBg
@@ -23,14 +27,38 @@ Dialog {
         padding: 16
         bottomPadding: 4
     }
-    contentItem: Label {
-        id: bodyLabel
-        wrapMode: Text.WordWrap
-        color: theme.textMuted
-        width: 320
+    contentItem: ColumnLayout {
+        spacing: 8
+        Label {
+            id: bodyLabel
+            wrapMode: Text.WordWrap
+            color: theme.textMuted
+            Layout.preferredWidth: 320
+        }
+        TextArea {
+            visible: root.showDetails && root.details !== ""
+            readOnly: true
+            wrapMode: Text.Wrap
+            text: root.details
+            font.family: "monospace"
+            font.pixelSize: 12
+            color: theme.textMain
+            Layout.preferredWidth: 440
+            Layout.preferredHeight: 200
+            background: Rectangle {
+                color: theme.boxDisabledBg
+                radius: 8
+            }
+        }
     }
     footer: RowLayout {
         spacing: 8
+        Button {
+            text: root.showDetails ? "隐藏输出" : "查看输出"
+            flat: true
+            visible: root.details !== ""
+            onClicked: root.showDetails = !root.showDetails
+        }
         Item { Layout.fillWidth: true }
         Button {
             text: "确定"

@@ -86,19 +86,22 @@ class TimezoneBridge(QObject):
         if 0 <= index < len(self._zones):
             self._setCurrentIndex(index)
 
-    @Slot(str)
-    def setZoneByName(self, name: str):
-        """可搜索下拉框回车确认：精确匹配优先，忽略大小写兜底。"""
+    @Slot(str, result=bool)
+    def setZoneByName(self, name: str) -> bool:
+        """可搜索下拉框确认：精确匹配优先，忽略大小写兜底。
+        返回是否匹配成功；失败弹提示。供回车与“应用”按钮共用，避免
+        打字后直接点应用导致新旧选项错位。"""
         text = (name or "").strip()
         if text in self._zones:
             self._setCurrentIndex(self._zones.index(text))
-            return
+            return True
         lowered = text.lower()
         for i, z in enumerate(self._zones):
             if z.lower() == lowered:
                 self._setCurrentIndex(i)
-                return
+                return True
         self.message.emit("提示", f"未找到时区：{text}", True)
+        return False
 
     @Slot()
     def apply(self):
@@ -121,7 +124,7 @@ class TimezoneBridge(QObject):
                 raise RuntimeError(result.stderr.strip() or "授权失败或执行错误")
             return result
 
-        worker = Worker(_task)
+        worker = Worker(_task, label=f"时区/切换 {target}", timeout=60)
         self._workers.append(worker)
 
         def on_ok(_):
@@ -148,4 +151,6 @@ class TimezoneBridge(QObject):
             pass
         if worker in self._workers:
             self._workers.remove(worker)
-        worker.deleteLater()
+        # 超时线程任其自生自灭：不再触碰，避免销毁仍在运行的线程导致崩溃
+        if not getattr(worker, "timed_out", False):
+            worker.deleteLater()

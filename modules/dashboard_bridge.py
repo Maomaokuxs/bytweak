@@ -7,7 +7,7 @@ import socket
 
 from PySide6.QtCore import QObject, Signal, Property, Slot
 
-from .utils import logger
+from .utils import logger, get_os_info, is_fedora, is_atomic
 
 CONFIG_DIR = os.path.expanduser("~/.config/fedora-tweak-tool")
 CONFIG_PATH = os.path.join(CONFIG_DIR, "dashboard.json")
@@ -17,13 +17,17 @@ ALL_CARDS = [
     {"id": "grub", "title": "GRUB"},
     {"id": "gpu", "title": "显卡"},
     {"id": "cursor", "title": "鼠标"},
-    {"id": "repo", "title": "软件源"},
+    {"id": "repo", "title": "软件包"},
     {"id": "fcitx", "title": "输入法"},
     {"id": "desktop", "title": "桌面"},
+    {"id": "service", "title": "服务"},
+    {"id": "flatpak", "title": "Flatpak"},
+    {"id": "dnf", "title": "DNF"},
 ]
 
 CARD_PAGES = {"timezone": 1, "grub": 2, "gpu": 3, "cursor": 4,
-              "repo": 5, "fcitx": 6, "desktop": 7}
+              "repo": 5, "fcitx": 6, "desktop": 7,
+              "service": 9, "flatpak": 10, "dnf": 11}
 
 
 def _read_cpu_model() -> str:
@@ -127,9 +131,32 @@ class DashboardBridge(QObject):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        os_info = get_os_info()
+        self._is_fedora = is_fedora(os_info)
+        self._is_atomic = is_atomic(os_info)
+        self._os_name = os_info.get("pretty", "") or "未知系统"
         self._visible: list[str] = _load_visible()
+        if self._is_atomic and "dnf" in self._visible:
+            self._visible.remove("dnf")
+
+    def getOsName(self):
+        return self._os_name
+
+    osName = Property(str, getOsName, constant=True)
+
+    def getIsFedora(self):
+        return self._is_fedora
+
+    isFedora = Property(bool, getIsFedora, constant=True)
+
+    def getIsAtomic(self):
+        return self._is_atomic
+
+    isAtomic = Property(bool, getIsAtomic, constant=True)
 
     def getAllCards(self):
+        if self._is_atomic:
+            return [c for c in ALL_CARDS if c["id"] != "dnf"]
         return ALL_CARDS
 
     allCards = Property(list, getAllCards, constant=True)
@@ -152,6 +179,8 @@ class DashboardBridge(QObject):
     def setCardVisible(self, card_id: str, on: bool):
         if card_id not in CARD_PAGES:
             return
+        if on and card_id == "dnf" and self._is_atomic:
+            return
         changed = False
         if on and card_id not in self._visible:
             order = [c["id"] for c in ALL_CARDS]
@@ -167,6 +196,8 @@ class DashboardBridge(QObject):
 
     @Slot(str)
     def goPage(self, card_id: str):
+        if card_id == "dnf" and self._is_atomic:
+            return
         if card_id in CARD_PAGES:
             self.navigate.emit(CARD_PAGES[card_id])
 

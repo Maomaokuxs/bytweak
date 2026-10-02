@@ -1,8 +1,10 @@
 """Fcitx5 QML 桥接：fcitx_core 配置读写 + 主题扫描导入（用户态，无需提权）。"""
+import time
+
 from PySide6.QtCore import QObject, Signal, Property, Slot, QUrl
 
 from . import fcitx_core
-from .utils import logger
+from .utils import logger, log_operation
 
 
 class FcitxBridge(QObject):
@@ -114,6 +116,7 @@ class FcitxBridge(QObject):
 
     @Slot()
     def apply(self):
+        start = time.monotonic()
         if self._file_path:
             try:
                 name = fcitx_core.import_archive(self._file_path)
@@ -121,8 +124,10 @@ class FcitxBridge(QObject):
                 self._setFilePath("")
                 self.refresh()
                 self.message.emit("成功", "输入法主题配置已应用", False)
+                log_operation(f"输入法/导入主题 {name}", True, time.monotonic() - start)
             except Exception as e:
                 self.message.emit("导入失败", str(e), True)
+                log_operation("输入法/导入主题", False, time.monotonic() - start, str(e))
             return
         light = self._themes[self._light_index] if 0 <= self._light_index < len(self._themes) else ""
         dark = self._themes[self._dark_index] if 0 <= self._dark_index < len(self._themes) else ""
@@ -133,5 +138,7 @@ class FcitxBridge(QObject):
             fcitx_core.write_config(light, dark, self._auto)
             self.refresh()
             self.message.emit("成功", "输入法主题配置已应用", False)
+            log_operation(f"输入法/应用 {light}/{dark}", True, time.monotonic() - start)
         except Exception as e:
             self.message.emit("失败", f"应用配置失败：{e}", True)
+            log_operation(f"输入法/应用 {light}/{dark}", False, time.monotonic() - start, str(e))

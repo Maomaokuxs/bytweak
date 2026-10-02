@@ -58,6 +58,8 @@ ColumnLayout {
         if (id === "cursor")
             return (cursor.themeList.length > 0 && cursor.currentThemeIndex >= 0) ? cursor.themeList[cursor.currentThemeIndex] : "—"
         if (id === "repo") {
+            if (repo.upgradesChecked && repo.upgradablePkgs.length > 0)
+                return repo.upgradablePkgs.length + " 个可更新"
             var on = repo.repoList.filter(function (r) { return r.enabled }).length
             return on + " / " + repo.repoList.length + " 已启用"
         }
@@ -70,6 +72,13 @@ ColumnLayout {
             return (light || dark) ? light + (dark && dark !== light ? " / " + dark : "") : "—"
         }
         if (id === "desktop") return desk.statusText
+        if (id === "service") {
+            var n = svc.serviceList.filter(function (s) { return s.active }).length
+            return svc.serviceList.length > 0 ? n + " 运行中" : "—"
+        }
+        if (id === "flatpak")
+            return flat.available ? flat.appList.length + " 个应用" : "未安装"
+        if (id === "dnf") return dnf.supported ? "传统 DNF 可用" : "未检测到 DNF"
         return ""
     }
 
@@ -121,14 +130,10 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
         clip: true
-        Item {
+        padding: 16
+        ColumnLayout {
             width: dashScroll.availableWidth
-            height: innerCol.implicitHeight + 32
-            ColumnLayout {
-                id: innerCol
-                anchors.fill: parent
-                anchors.margins: 16
-                spacing: 12
+            spacing: 12
 
                 RowLayout {
                     Layout.fillWidth: true
@@ -206,7 +211,6 @@ ColumnLayout {
                     Layout.fillWidth: true
                     visible: dash.visibleCards.length === 0
                 }
-            }
         }
     }
 
@@ -216,7 +220,11 @@ ColumnLayout {
         gpu.refresh()
         cursor.refresh()
         repo.refresh()
+        repo.refreshUpgrades()
         fcitx.refresh()
         desk.refresh()
+        svc.refresh()
+        flat.refresh()
+        dnf.refresh()
     }
 }

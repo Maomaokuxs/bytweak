@@ -124,7 +124,7 @@ class GrubBridge(QObject):
         except ValueError as e:
             self.message.emit("错误", str(e), True)
             return
-        self._run_privileged(script, f"成功切换本地已有主题：【{name}】")
+        self._run_privileged(script, f"成功切换本地已有主题：【{name}】", label=f"GRUB/切换本地主题 {name}")
 
     def _apply_archive(self, path: str):
         try:
@@ -179,12 +179,13 @@ class GrubBridge(QObject):
             self._setFilePath("")
 
         self._run_privileged(
-            script, "外部主题安装应用成功！", on_success_cb=on_success, sandbox=sandbox
+            script, "外部主题安装应用成功！", on_success_cb=on_success, sandbox=sandbox,
+            label=f"GRUB/安装外部主题 {source_dir.split('/')[-1]}"
         )
 
     # ---------- 后台执行 ----------
 
-    def _run_privileged(self, script: str, success_msg: str, on_success_cb=None, sandbox: str = ""):
+    def _run_privileged(self, script: str, success_msg: str, on_success_cb=None, sandbox: str = "", label: str = ""):
         self._setBusy(True)
 
         def _task():
@@ -193,7 +194,7 @@ class GrubBridge(QObject):
                 raise RuntimeError(result.stderr.strip() or result.stdout.strip() or "执行失败")
             return result
 
-        worker = Worker(_task)
+        worker = Worker(_task, label=label or "GRUB/提权执行", timeout=420)
         self._workers.append(worker)
 
         def on_ok(_):
@@ -224,4 +225,6 @@ class GrubBridge(QObject):
             pass
         if worker in self._workers:
             self._workers.remove(worker)
-        worker.deleteLater()
+        # 超时线程任其自生自灭：不再触碰，避免销毁仍在运行的线程导致崩溃
+        if not getattr(worker, "timed_out", False):
+            worker.deleteLater()
