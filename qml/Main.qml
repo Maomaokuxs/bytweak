@@ -106,6 +106,12 @@ ApplicationWindow {
                     id: searchField
                     Layout.fillWidth: true
                     placeholderText: "搜索设置…"
+                    placeholderTextColor: theme.textSub
+                    color: theme.textMain
+                    background: Rectangle {
+                        radius: 8
+                        color: theme.boxDisabledBg
+                    }
                     onTextChanged: root.filterNav(text)
                     Keys.onEscapePressed: {
                         clear()
