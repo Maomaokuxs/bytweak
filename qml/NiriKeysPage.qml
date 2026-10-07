@@ -97,7 +97,7 @@ ColumnLayout {
                 }
             }
 
-            TextField {
+            AppTextField {
                 objectName: "keySearch"
                 Layout.fillWidth: true
                 Layout.maximumWidth: 420

@@ -102,18 +102,10 @@ ApplicationWindow {
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 6
-                TextField {
+                AppTextField {
                     id: searchField
                     Layout.fillWidth: true
                     placeholderText: "搜索设置…"
-                    placeholderTextColor: theme.textSub
-                    color: theme.textMain
-                    background: Rectangle {
-                        radius: 8
-                        color: theme.boxDisabledBg
-                        border.color: theme.boxBorder
-                        border.width: 1
-                    }
                     onTextChanged: root.filterNav(text)
                     Keys.onEscapePressed: {
                         clear()

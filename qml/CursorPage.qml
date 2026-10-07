@@ -48,7 +48,7 @@ ColumnLayout {
                             Layout.fillWidth: true
                             spacing: 12
                             Label { text: "主题文件"; Layout.preferredWidth: 80 }
-                            TextField {
+                            AppTextField {
                                 Layout.fillWidth: true
                                 Layout.maximumWidth: 420
                                 readOnly: true

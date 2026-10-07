@@ -89,7 +89,7 @@ ColumnLayout {
                         RowLayout {
                             Layout.fillWidth: true
                             spacing: 8
-                            TextField {
+                            AppTextField {
                                 id: uniQuery
                                 Layout.fillWidth: true
                                 placeholderText: "搜索软件包或 COPR 项目，如 fastfetch…"
@@ -495,7 +495,7 @@ ColumnLayout {
             anchors.margins: 16
             spacing: 8
             Label { text: "软件源配置"; font.pixelSize: 18; font.bold: true; renderType: Text.NativeRendering }
-            TextField {
+            AppTextField {
                 Layout.fillWidth: true
                 placeholderText: "搜索仓库名称或 ID…"
                 onTextChanged: repoQuery = text

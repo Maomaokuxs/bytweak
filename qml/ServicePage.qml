@@ -44,7 +44,7 @@ ColumnLayout {
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 8
-                TextField {
+                AppTextField {
                     Layout.fillWidth: true
                     Layout.maximumWidth: 420
                     placeholderText: "搜索服务名或描述…"

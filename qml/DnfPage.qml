@@ -55,7 +55,7 @@ ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 12
                         Label { text: "并行下载数"; Layout.preferredWidth: 80 }
-                        TextField {
+                        AppTextField {
                             Layout.maximumWidth: 120
                             text: parallelText
                             validator: IntValidator { bottom: 1; top: 20 }
@@ -106,7 +106,7 @@ ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 12
                         Label { text: "旧内核保留"; Layout.preferredWidth: 80 }
-                        TextField {
+                        AppTextField {
                             Layout.maximumWidth: 120
                             text: installonlyText
                             validator: IntValidator { bottom: 2; top: 10 }

@@ -80,7 +80,7 @@ ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 12
                         Label { text: "应用 ID"; Layout.preferredWidth: 80 }
-                        TextField {
+                        AppTextField {
                             id: installField
                             Layout.fillWidth: true
                             Layout.maximumWidth: 420
@@ -112,7 +112,7 @@ ColumnLayout {
                 ColumnLayout {
                     anchors.fill: parent
                     spacing: 8
-                    TextField {
+                    AppTextField {
                         Layout.fillWidth: true
                         Layout.maximumWidth: 420
                         placeholderText: "搜索应用名或 ID…"

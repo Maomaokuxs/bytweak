@@ -49,7 +49,7 @@ ColumnLayout {
                     }
                     RowLayout {
                         spacing: 8
-                        TextField {
+                        AppTextField {
                             id: nameField
                             Layout.fillWidth: true
                             Layout.maximumWidth: 320
