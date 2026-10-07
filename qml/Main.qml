@@ -14,22 +14,16 @@ ApplicationWindow {
     title: "Fedora Tweak Tool"
 
     // 极简导航：竖线条 + 文字 + 选中阴影衬底（附关键字供搜索过滤）
+    // 同类功能已合并为选项卡：导航 8 项，组内顶部 TabBar 切换
     property var navFull: [
         { "name": "总览", "page": 0, "keys": "总览 首页 概览 状态 仪表盘 主机 内存 硬盘 home dashboard" },
-        { "name": "时区设置", "page": 1, "keys": "时区 时间 时钟 日期 timezone" },
-        { "name": "GRUB 配置", "page": 2, "keys": "grub 引导 开机 启动菜单 主题 boot" },
+        { "name": "系统设置", "page": 1, "keys": "系统设置 时区 时间 时钟 日期 timezone 主机名 hostname 电脑名" },
+        { "name": "启动管理", "page": 2, "keys": "启动管理 grub 引导 开机 启动菜单 主题 boot 内核 kernel 旧内核 grubby" },
         { "name": "显卡与硬件加速", "page": 3, "keys": "显卡 gpu 驱动 硬解 编解码 nvidia amd intel 加速" },
-        { "name": "鼠标指针样式", "page": 4, "keys": "鼠标 指针 光标 主题 mouse cursor" },
-        { "name": "软件包管理", "page": 5, "keys": "软件包 安装 copr 软件源 仓库 rpm fusion repo dnf" },
-        { "name": "Fcitx 输入法", "page": 6, "keys": "输入法 拼音 主题 fcitx input" },
-        { "name": "桌面组件", "page": 7, "keys": "桌面 通知 顶栏 waybar quickshell mako dunst 自启 niri" },
-        { "name": "niri 快捷键", "page": 8, "keys": "niri 快捷键 键位 热键 按键 hotkey keybind 快捷键位" },
-        { "name": "服务管理", "page": 9, "keys": "服务 自启 开机 systemctl systemd service 启动 停止" },
-        { "name": "Flatpak 管理", "page": 10, "keys": "flatpak 应用 沙盒 flathub 安装 卸载 更新" },
-        { "name": "DNF 调优", "page": 11, "keys": "dnf 调优 下载 镜像 缓存 并行 fastestmirror" },
-        { "name": "默认应用设置", "page": 12, "keys": "默认应用 浏览器 文件管理器 默认程序 打开方式 mime" },
-        { "name": "内核管理", "page": 13, "keys": "内核 kernel 删除 旧内核 默认启动 grubby boot" },
-        { "name": "主机名", "page": 14, "keys": "主机名 hostname 电脑名 改名" }
+        { "name": "输入设备", "page": 4, "keys": "输入设备 输入法 拼音 fcitx input 鼠标 指针 光标 mouse cursor" },
+        { "name": "软件管理", "page": 5, "keys": "软件管理 软件包 安装 copr 软件源 仓库 rpm fusion repo dnf flatpak 沙盒 flathub 调优 镜像 缓存 并行" },
+        { "name": "桌面环境", "page": 6, "keys": "桌面环境 桌面 通知 顶栏 waybar quickshell mako dunst 自启 niri 快捷键 热键 hotkey keybind 默认应用 打开方式 mime" },
+        { "name": "服务管理", "page": 7, "keys": "服务 自启 开机 systemctl systemd service 启动 停止" }
     ]
 
     function filterNav(q) {
@@ -54,12 +48,17 @@ ApplicationWindow {
         nav.currentIndex = -1
     }
 
-    function gotoPage(page) {
+    function gotoPage(page, sub) {
         if (searchField.displayText !== "")
             searchField.clear()
         searchField.focus = false
         stack.currentIndex = page
         syncNavHighlight()
+        if (sub !== undefined && sub !== null) {
+            const child = stack.children[page]
+            if (child && typeof child.showTab === "function")
+                child.showTab(sub)
+        }
     }
 
     // 切页过渡：新页淡入 + 微缩回弹（只作用于进入页；
@@ -189,17 +188,12 @@ ApplicationWindow {
 
         Connections {
             target: dash
-            function onNavigate(index) { root.gotoPage(index) }
+            function onNavigate(page, sub) { root.gotoPage(page, sub) }
         }
 
         AppDialog { id: sysWarnDlg }
 
         Component.onCompleted: {
-            if (dash.isAtomic) {
-                root.navFull = root.navFull.filter(function (e) { return e.page !== 11 && e.page !== 13 })
-                nav.model = root.navFull
-                syncNavHighlight()
-            }
             if (!dash.isFedora) {
                 sysWarnDlg.title = "系统不受支持"
                 sysWarnDlg.body = "检测到当前系统为“" + dash.osName + "”，本工具专为 Fedora 设计，部分功能可能不可用或执行失败。"
@@ -234,20 +228,13 @@ ApplicationWindow {
                 currentIndex: 0
 
                 DashboardPage {}
-                TimezonePage {}
-                GrubPage {}
+                SystemTabsPage {}
+                BootTabsPage {}
                 GpuPage {}
-                CursorPage {}
-                RepoPage {}
-                FcitxPage {}
-                DesktopPage {}
-                NiriKeysPage {}
+                InputTabsPage {}
+                SoftwareTabsPage {}
+                DesktopTabsPage {}
                 ServicePage {}
-                FlatpakPage {}
-                DnfPage {}
-                DefaultAppsPage {}
-                KernelPage {}
-                HostnamePage {}
 
                 onCurrentIndexChanged: {
                     const page = stack.children[stack.currentIndex]

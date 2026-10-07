@@ -25,9 +25,9 @@ ALL_CARDS = [
     {"id": "dnf", "title": "DNF"},
 ]
 
-CARD_PAGES = {"timezone": 1, "grub": 2, "gpu": 3, "cursor": 4,
-              "repo": 5, "fcitx": 6, "desktop": 7,
-              "service": 9, "flatpak": 10, "dnf": 11}
+CARD_PAGES = {"timezone": (1, 0), "grub": (2, 0), "gpu": (3, 0), "cursor": (4, 1),
+              "repo": (5, 0), "fcitx": (4, 0), "desktop": (6, 0),
+              "service": (7, 0), "flatpak": (5, 1), "dnf": (5, 2)}
 
 
 def _read_cpu_model() -> str:
@@ -127,7 +127,7 @@ def _load_visible() -> list[str]:
 
 class DashboardBridge(QObject):
     cardsChanged = Signal()
-    navigate = Signal(int)
+    navigate = Signal(int, int)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -199,7 +199,8 @@ class DashboardBridge(QObject):
         if card_id == "dnf" and self._is_atomic:
             return
         if card_id in CARD_PAGES:
-            self.navigate.emit(CARD_PAGES[card_id])
+            page, sub = CARD_PAGES[card_id]
+            self.navigate.emit(page, sub)
 
     def _save(self):
         try:
