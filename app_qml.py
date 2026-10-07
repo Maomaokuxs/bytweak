@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Fedora Tweak Tool · QML 版主程序：FluentWinUI3 + 11 桥接，后端全部复用 *_core。
+"""Fedora Tweak Tool · QML 版主程序：FluentWinUI3 + 14 桥接，后端全部复用 *_core。
 运行：python3 app_qml.py"""
 import os
 import sys
@@ -59,6 +59,9 @@ def main():
     from modules.service_bridge import ServiceBridge
     from modules.flatpak_bridge import FlatpakBridge
     from modules.dnf_bridge import DnfBridge
+    from modules.defaultapps_bridge import DefaultAppsBridge
+    from modules.kernel_bridge import KernelBridge
+    from modules.hostname_bridge import HostnameBridge
 
     cursor_provider = CursorPreviewProvider()
     gpu_bridge = GpuBridge()
@@ -76,6 +79,9 @@ def main():
         "svc": ServiceBridge(),
         "flat": FlatpakBridge(),
         "dnf": DnfBridge(),
+        "defapp": DefaultAppsBridge(),
+        "kernel": KernelBridge(),
+        "hostname": HostnameBridge(),
     }
 
     engine = QQmlApplicationEngine()
@@ -87,7 +93,7 @@ def main():
         logger.error("Main.qml 加载失败")
         print("Main.qml 加载失败", file=sys.stderr)
         return 1
-    logger.info("QML 主程序启动：11 页桥接就绪")
+    logger.info("QML 主程序启动：14 页桥接就绪")
     try:
         from modules.utils import log_operation, operations_log_path
         log_operation("应用/启动", True)

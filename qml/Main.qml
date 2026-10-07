@@ -26,7 +26,10 @@ ApplicationWindow {
         { "name": "niri 快捷键", "page": 8, "keys": "niri 快捷键 键位 热键 按键 hotkey keybind 快捷键位" },
         { "name": "服务管理", "page": 9, "keys": "服务 自启 开机 systemctl systemd service 启动 停止" },
         { "name": "Flatpak 管理", "page": 10, "keys": "flatpak 应用 沙盒 flathub 安装 卸载 更新" },
-        { "name": "DNF 调优", "page": 11, "keys": "dnf 调优 下载 镜像 缓存 并行 fastestmirror" }
+        { "name": "DNF 调优", "page": 11, "keys": "dnf 调优 下载 镜像 缓存 并行 fastestmirror" },
+        { "name": "默认应用设置", "page": 12, "keys": "默认应用 浏览器 文件管理器 默认程序 打开方式 mime" },
+        { "name": "内核管理", "page": 13, "keys": "内核 kernel 删除 旧内核 默认启动 grubby boot" },
+        { "name": "主机名", "page": 14, "keys": "主机名 hostname 电脑名 改名" }
     ]
 
     function filterNav(q) {
@@ -193,7 +196,7 @@ ApplicationWindow {
 
         Component.onCompleted: {
             if (dash.isAtomic) {
-                root.navFull = root.navFull.filter(function (e) { return e.page !== 11 })
+                root.navFull = root.navFull.filter(function (e) { return e.page !== 11 && e.page !== 13 })
                 nav.model = root.navFull
                 syncNavHighlight()
             }
@@ -242,6 +245,9 @@ ApplicationWindow {
                 ServicePage {}
                 FlatpakPage {}
                 DnfPage {}
+                DefaultAppsPage {}
+                KernelPage {}
+                HostnamePage {}
 
                 onCurrentIndexChanged: {
                     const page = stack.children[stack.currentIndex]
