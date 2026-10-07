@@ -45,7 +45,7 @@ ColumnLayout {
                             Layout.fillWidth: true
                             spacing: 12
                             Label { text: "选择时区"; Layout.preferredWidth: 80 }
-                            ComboBox {
+                            AppComboBox {
                                 id: tzCombo
                                 Layout.fillWidth: true
                                 Layout.maximumWidth: 420

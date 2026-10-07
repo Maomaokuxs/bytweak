@@ -54,7 +54,7 @@ ColumnLayout {
                         focus = false
                     }
                 }
-                ComboBox {
+                AppComboBox {
                     Layout.preferredWidth: 110
                     model: ["全部", "运行中", "已停止"]
                     onActivated: svcFilter = index

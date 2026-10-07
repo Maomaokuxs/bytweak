@@ -134,7 +134,7 @@ ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 12
                 Label { text: "选择主题"; Layout.preferredWidth: 80 }
-                ComboBox {
+                AppComboBox {
                     id: themeCombo
                     objectName: "themeCombo"
                     Layout.fillWidth: true

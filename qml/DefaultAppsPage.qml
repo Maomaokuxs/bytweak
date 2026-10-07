@@ -49,7 +49,7 @@ ColumnLayout {
                             elide: Text.ElideRight
                             opacity: 0.8
                         }
-                        ComboBox {
+                        AppComboBox {
                             Layout.preferredWidth: 260
                             model: modelData.candidates.map(function (c) { return c.name })
                             currentIndex: Math.max(0, modelData.candidates.findIndex(function (c) { return c.id === modelData.current }))

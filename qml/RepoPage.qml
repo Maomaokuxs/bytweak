@@ -125,7 +125,7 @@ ColumnLayout {
                             Layout.fillWidth: true
                             spacing: 8
                             visible: hasSearched
-                            ComboBox {
+                            AppComboBox {
                                 Layout.preferredWidth: 140
                                 model: ["全部来源", "仅官方", "仅 COPR", "仅第三方"]
                                 onActivated: resultFilter = index
@@ -507,7 +507,7 @@ ColumnLayout {
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 8
-                ComboBox {
+                AppComboBox {
                     Layout.fillWidth: true
                     model: ["全部", "已启用", "未启用"]
                     onActivated: repoFilter = index

@@ -70,7 +70,7 @@ ColumnLayout {
                             Layout.fillWidth: true
                             spacing: 12
                             Label { text: "当前主题"; Layout.preferredWidth: 80 }
-                            ComboBox {
+                            AppComboBox {
                                 Layout.fillWidth: true
                                 Layout.maximumWidth: 420
                                 model: cursor.themeList

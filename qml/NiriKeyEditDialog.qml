@@ -145,7 +145,7 @@ Dialog {
             opacity: 0.7
             color: theme.textMain
         }
-        ComboBox {
+        AppComboBox {
             id: keyCombo
             Layout.fillWidth: true
             editable: true

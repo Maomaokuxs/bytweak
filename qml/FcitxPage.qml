@@ -76,7 +76,7 @@ ColumnLayout {
                             Layout.fillWidth: true
                             spacing: 12
                             Label { text: "浅色主题"; Layout.preferredWidth: 80 }
-                            ComboBox {
+                            AppComboBox {
                                 Layout.fillWidth: true
                                 Layout.maximumWidth: 420
                                 model: fcitx.themeList
@@ -97,7 +97,7 @@ ColumnLayout {
                             Layout.fillWidth: true
                             spacing: 12
                             Label { text: "深色主题"; Layout.preferredWidth: 80 }
-                            ComboBox {
+                            AppComboBox {
                                 Layout.fillWidth: true
                                 Layout.maximumWidth: 420
                                 model: fcitx.themeList

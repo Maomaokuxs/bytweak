@@ -124,7 +124,7 @@ ApplicationWindow {
             Layout.fillWidth: true
             ColumnLayout {
                 anchors.fill: parent
-                ComboBox {
+                AppComboBox {
                     id: themeCombo
                     objectName: "themeCombo"
                     Layout.fillWidth: true
