@@ -111,6 +111,8 @@ ApplicationWindow {
                     background: Rectangle {
                         radius: 8
                         color: theme.boxDisabledBg
+                        border.color: theme.boxBorder
+                        border.width: 1
                     }
                     onTextChanged: root.filterNav(text)
                     Keys.onEscapePressed: {
