@@ -18,6 +18,13 @@ def main():
     QQuickStyle.setStyle("FluentWinUI3")
     app = QApplication(sys.argv)
     app.setDesktopFileName("fedora-tweak-tool-qml.desktop")
+    # 强制中文 locale：经 SSH 等无 LANG 环境启动时，Qt 对话框（文件选择器）会显示英文；
+    # 应用界面本身是中文写死的，这里保持一致
+    try:
+        from PySide6.QtCore import QLocale as _QLocale
+        _QLocale.setDefault(_QLocale(_QLocale.Chinese, _QLocale.China))
+    except Exception:
+        pass
     # 锁定浅色方案：Fluent 素材按 styleHints 配色解析，平台主题（如深色 GTK）会误判为深色；
     # 与下方浅色调色板保持一致，否则出现深底深字
     try:
