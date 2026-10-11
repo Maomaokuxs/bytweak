@@ -19,7 +19,7 @@ class GrubManager:
         if not self.ctx.grub_theme_combo:
             return
         try:
-            valid_themes = grub_core.list_local_themes(self.system_themes_root)
+            valid_themes = grub_core.list_local_themes()
             current, _ = grub_core.get_current_theme()
             self.ctx.grub_theme_combo.clear()
             self.ctx.grub_theme_combo.addItems(valid_themes)

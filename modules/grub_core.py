@@ -6,7 +6,26 @@ import shutil
 import tarfile
 import zipfile
 
-SYSTEM_THEMES_ROOT = "/usr/share/grub/themes"
+USR_THEMES_ROOT = "/usr/share/grub/themes"
+BOOT_THEMES_ROOT = "/boot/grub2/themes"
+# 向后兼容：旧代码引用的常量
+SYSTEM_THEMES_ROOT = USR_THEMES_ROOT
+
+
+def get_themes_root() -> str:
+    """/boot 为独立分区时返回 /boot/grub2/themes（与 GRUB 同分区，最稳健），
+    否则返回标准的 /usr/share/grub/themes。"""
+    if os.path.ismount("/boot"):
+        return BOOT_THEMES_ROOT
+    return USR_THEMES_ROOT
+
+
+def find_theme_root(name: str) -> str | None:
+    """在两个主题目录中查找含 theme.txt 的主题，返回其所在的 root；找不到返回 None。"""
+    for r in (BOOT_THEMES_ROOT, USR_THEMES_ROOT):
+        if os.path.exists(os.path.join(r, name, "theme.txt")):
+            return r
+    return None
 GRUB_DEFAULTS = "/etc/default/grub"
 SANDBOX_DIR = "/tmp/grub_theme_sandbox"
 
@@ -27,24 +46,29 @@ def get_current_theme() -> tuple[str | None, str]:
     return None, "当前正在使用的主题：系统默认文字菜单 (未启用主题)"
 
 
-def list_local_themes(root: str = SYSTEM_THEMES_ROOT) -> list[str]:
-    """列出已安装且含 theme.txt 的主题名（排序后）。"""
-    if not os.path.exists(root):
-        return []
-    valid = []
-    for name in os.listdir(root):
-        full_path = os.path.join(root, name)
-        if os.path.isdir(full_path) and os.path.exists(os.path.join(full_path, "theme.txt")):
-            valid.append(name)
-    valid.sort()
-    return valid
+def list_local_themes(root: str | None = None) -> list[str]:
+    """列出已安装且含 theme.txt 的主题名（排序后）。
+    root 为 None 时同时扫描 /boot/grub2/themes 与 /usr/share/grub/themes（去重），
+    保证两个位置的主题都能被识别到；传入 root 则只扫描该目录（兼容旧调用）。"""
+    roots = [root] if root else [BOOT_THEMES_ROOT, USR_THEMES_ROOT]
+    seen: set[str] = set()
+    for r in roots:
+        if not r or not os.path.exists(r):
+            continue
+        for name in os.listdir(r):
+            full_path = os.path.join(r, name)
+            if os.path.isdir(full_path) and os.path.exists(os.path.join(full_path, "theme.txt")):
+                seen.add(name)
+    return sorted(seen)
 
 
-def build_switch_script(selected_name: str, root: str = SYSTEM_THEMES_ROOT) -> str:
-    """本地主题一键切换脚本；主题名非法时抛 ValueError。"""
+def build_switch_script(selected_name: str, root: str | None = None) -> str:
+    """本地主题一键切换脚本；主题名非法时抛 ValueError。
+    root 为 None 时自动在两个主题目录中定位该主题。"""
     if not VALID_NAME.match(selected_name or ""):
         raise ValueError(f"非法主题名: {selected_name}")
-    target_theme_txt = os.path.join(root, selected_name, "theme.txt")
+    actual_root = root or find_theme_root(selected_name) or get_themes_root()
+    target_theme_txt = os.path.join(actual_root, selected_name, "theme.txt")
     return (
         "sed -i '/^GRUB_THEME=/d' /etc/default/grub"
         f" && echo 'GRUB_THEME={shlex.quote(target_theme_txt)}' >> /etc/default/grub"
@@ -85,8 +109,10 @@ def find_theme_dirs(sandbox_dir: str) -> dict[str, str]:
     return detected
 
 
-def build_install_script(source_dir: str, root: str = SYSTEM_THEMES_ROOT) -> tuple[str, str]:
-    """外部主题安装脚本；返回 (脚本, 主题目录名)。目录名非法抛 ValueError。"""
+def build_install_script(source_dir: str, root: str | None = None) -> tuple[str, str]:
+    """外部主题安装脚本；返回 (脚本, 主题目录名)。目录名非法抛 ValueError。
+    root 为 None 时安装到自动判断的最优目录（/boot 独立分区则用 /boot/grub2/themes）。"""
+    root = root or get_themes_root()
     theme_name = os.path.basename(source_dir.rstrip("/"))
     if not VALID_NAME.match(theme_name):
         raise ValueError(f"主题目录名非法: {theme_name}")
