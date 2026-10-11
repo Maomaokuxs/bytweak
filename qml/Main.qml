@@ -104,6 +104,7 @@ ApplicationWindow {
                 spacing: 6
                 AppTextField {
                     id: searchField
+                    underline: true
                     Layout.fillWidth: true
                     placeholderText: "搜索设置…"
                     onTextChanged: root.filterNav(text)

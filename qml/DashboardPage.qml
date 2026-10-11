@@ -102,7 +102,7 @@ ColumnLayout {
                         id: customBtn
                         text: "自定义卡片"
                         flat: true
-                        onClicked: customPopup.open()
+                        onClicked: customPopup.opened ? customPopup.close() : customPopup.open()
                         // 下拉复选框：从按钮下方弹出，点击外部/按 Esc 关闭
                         Popup {
                             id: customPopup
