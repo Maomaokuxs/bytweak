@@ -30,11 +30,15 @@ class TimezoneBridge(QObject):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._zones: list[str] = []
+        # 实际系统时区：只由 refresh() 从 timedatectl 读取更新
         self._current_index = -1
+        # 下拉框里的用户选择：setZone/setZoneByName 更新，apply() 应用它
+        self._selected_index = -1
         self._busy = False
         self._workers: list[Worker] = []
 
     def getStatus(self):
+        # 只显示真实系统时区，不受下拉框选择影响
         if 0 <= self._current_index < len(self._zones):
             return f"当前系统时区：{self._zones[self._current_index]}"
         return "当前系统时区：正在获取..."
@@ -47,11 +51,12 @@ class TimezoneBridge(QObject):
     zoneList = Property(list, getZones, notify=zonesChanged)
 
     def getCurrentIndex(self):
-        return self._current_index
+        # 供下拉框 currentIndex 绑定：显示的是用户选择
+        return self._selected_index
 
-    def _setCurrentIndex(self, v):
-        if self._current_index != v:
-            self._current_index = v
+    def _setSelectedIndex(self, v):
+        if self._selected_index != v:
+            self._selected_index = v
             self.zonesChanged.emit()
 
     currentZoneIndex = Property(int, getCurrentIndex, notify=zonesChanged)
@@ -76,6 +81,8 @@ class TimezoneBridge(QObject):
                 current = ""
             self._zones = zones
             self._current_index = zones.index(current) if current in zones else (0 if zones else -1)
+            # 刷新时选中项同步为真实时区
+            self._selected_index = self._current_index
             self.zonesChanged.emit()
             logger.debug(f"timezone synced to '{current}'")
         except Exception as e:
@@ -83,8 +90,9 @@ class TimezoneBridge(QObject):
 
     @Slot(int)
     def setZone(self, index: int):
+        # 只改用户选择，不碰实际时区显示
         if 0 <= index < len(self._zones):
-            self._setCurrentIndex(index)
+            self._setSelectedIndex(index)
 
     @Slot(str, result=bool)
     def setZoneByName(self, name: str) -> bool:
@@ -93,12 +101,12 @@ class TimezoneBridge(QObject):
         打字后直接点应用导致新旧选项错位。"""
         text = (name or "").strip()
         if text in self._zones:
-            self._setCurrentIndex(self._zones.index(text))
+            self._setSelectedIndex(self._zones.index(text))
             return True
         lowered = text.lower()
         for i, z in enumerate(self._zones):
             if z.lower() == lowered:
-                self._setCurrentIndex(i)
+                self._setSelectedIndex(i)
                 return True
         self.message.emit("提示", f"未找到时区：{text}", True)
         return False
@@ -107,12 +115,15 @@ class TimezoneBridge(QObject):
     def apply(self):
         if self._busy:
             return
-        if not (0 <= self._current_index < len(self._zones)):
+        if not (0 <= self._selected_index < len(self._zones)):
             self.message.emit("提示", "请选择合法时区", True)
             return
-        target = self._zones[self._current_index]
+        target = self._zones[self._selected_index]
         if "/" not in target:
             self.message.emit("提示", "请选择合法时区", True)
+            return
+        if self._selected_index == self._current_index:
+            self.message.emit("提示", "已经是当前时区，无需修改", False)
             return
         logger.debug(f"apply timezone -> {target}")
         self._setBusy(True)
