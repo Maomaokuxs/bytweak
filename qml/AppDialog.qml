@@ -29,11 +29,16 @@ Dialog {
     }
     contentItem: ColumnLayout {
         spacing: 8
-        Label {
+        // 正文用只读 TextEdit：支持鼠标选中复制（报错信息需要能复制）
+        TextEdit {
             id: bodyLabel
+            readOnly: true
+            selectByMouse: true
             wrapMode: Text.WordWrap
             color: theme.textMuted
             Layout.preferredWidth: 320
+            // 去掉 TextEdit 默认的焦点框样式，保持 Label 外观
+            activeFocusOnTab: false
         }
         TextArea {
             visible: root.showDetails && root.details !== ""
