@@ -29,6 +29,13 @@ ColumnLayout {
             spacing: 12
 
                 Label { text: "时区设置"; font.pixelSize: 22; font.bold: true; renderType: Text.NativeRendering }
+                Label {
+                    text: "时区决定系统时间的显示方式，修改后立即生效"
+                    opacity: 0.6
+                    font.pixelSize: 12
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                }
 
                 GroupBox {
                     title: "当前状态"
