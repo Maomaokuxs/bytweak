@@ -17,6 +17,32 @@ def main():
 
     QQuickStyle.setStyle("FluentWinUI3")
     app = QApplication(sys.argv)
+    # 点击输入框之外清除焦点：搜索框失焦、高亮消失、光标停止闪烁
+    # （QML MouseArea 会被 ScrollView 的 Flickable 挡住，故用全局事件过滤器）
+    from PySide6.QtCore import QObject as _QObject, QEvent as _QEvent, QPointF as _QPointF
+    class _FocusClearFilter(_QObject):
+        def eventFilter(self, watched, event):
+            if event.type() == _QEvent.Type.MouseButtonPress:
+                try:
+                    win = app.activeWindow()
+                    f = win.activeFocusItem() if win is not None else None
+                    if f is not None:
+                        cls = f.metaObject().className()
+                        if "TextField" in cls or "SearchBox" in cls:
+                            pos = event.position()
+                            try:
+                                top = f.mapToScene(_QPointF(0, 0))
+                                inside = (top.x() <= pos.x() <= top.x() + f.width()
+                                          and top.y() <= pos.y() <= top.y() + f.height())
+                            except Exception:
+                                inside = False
+                            if not inside:
+                                f.setFocus(False)
+                except Exception:
+                    pass
+            return super().eventFilter(watched, event)
+    _focus_filter = _FocusClearFilter(app)
+    app.installEventFilter(_focus_filter)
     app.setDesktopFileName("fedora-tweak-tool-qml.desktop")
     # 强制中文 locale：经 SSH 等无 LANG 环境启动时，Qt 对话框（文件选择器）会显示英文；
     # 应用界面本身是中文写死的，这里保持一致
