@@ -11,15 +11,17 @@ TextField {
     leftPadding: 16
     rightPadding: 16
     background: Item {
-        // 高亮层（下）：accent 胶囊，底部撑出 2px，仅底部弧线露在白底之外
+        // 高亮层（下）：accent 胶囊，底部撑出 3px，仅底部弧线露在白底之外
+        // 3px（而非 2px）：低 PPI 显示器上 2px 弧线锯齿明显，3px 抗锯齿更平滑
         Rectangle {
             visible: field.activeFocus
             anchors.fill: parent
-            anchors.bottomMargin: -2
+            anchors.bottomMargin: -3
             radius: height / 2
             color: "transparent"
             border.color: theme.accent
-            border.width: 2
+            border.width: 3
+            antialiasing: true
         }
         // 主体（上）：白胶囊 + 浅灰边框，盖住高亮层的上/左/右
         Rectangle {
