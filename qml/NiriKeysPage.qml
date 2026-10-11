@@ -105,12 +105,6 @@ ColumnLayout {
                 color: theme.textMain
                 leftPadding: 10
                 rightPadding: 10
-                background: Rectangle {
-                    radius: 6
-                    color: theme.cardBg
-                    border.color: parent.activeFocus ? theme.accent : theme.cardBorder
-                    border.width: parent.activeFocus ? 1.5 : 1
-                }
                 onTextChanged: keyQuery = text
                 Keys.onEscapePressed: {
                     clear()

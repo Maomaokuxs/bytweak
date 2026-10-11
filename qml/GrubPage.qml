@@ -124,6 +124,7 @@ ColumnLayout {
                         Layout.fillWidth: true
                         Layout.maximumWidth: 420
                         readOnly: true
+                        focusHighlight: false
                         placeholderText: "未选择，可直接切换本地主题"
                         text: grub.filePath
                     }

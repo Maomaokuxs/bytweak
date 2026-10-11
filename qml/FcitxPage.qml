@@ -65,6 +65,7 @@ ColumnLayout {
                                 Layout.fillWidth: true
                                 Layout.maximumWidth: 420
                                 readOnly: true
+                                focusHighlight: false
                                 placeholderText: "*.tar.gz / *.zip"
                                 text: fcitx.filePath
                             }
