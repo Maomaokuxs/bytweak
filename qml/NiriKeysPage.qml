@@ -97,14 +97,11 @@ ColumnLayout {
                 }
             }
 
-            AppTextField {
+            SearchBox {
                 objectName: "keySearch"
                 Layout.fillWidth: true
                 Layout.maximumWidth: 420
                 placeholderText: "搜索键位或功能，如 工作区、截图、Super+T…"
-                color: theme.textMain
-                leftPadding: 10
-                rightPadding: 10
                 onTextChanged: keyQuery = text
                 Keys.onEscapePressed: {
                     clear()

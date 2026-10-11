@@ -8,6 +8,8 @@ TextField {
     id: field
     placeholderTextColor: theme.textSub
     color: theme.textMain
+    leftPadding: 16
+    rightPadding: 16
     background: Item {
         // 高亮层（下）：accent 胶囊，底部撑出 2px，仅底部弧线露在白底之外
         Rectangle {

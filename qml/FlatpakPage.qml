@@ -119,7 +119,7 @@ ColumnLayout {
                 ColumnLayout {
                     anchors.fill: parent
                     spacing: 8
-                    AppTextField {
+                    SearchBox {
                         Layout.fillWidth: true
                         Layout.maximumWidth: 420
                         placeholderText: "搜索应用名或 ID…"
