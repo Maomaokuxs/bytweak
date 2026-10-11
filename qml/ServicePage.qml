@@ -40,6 +40,13 @@ ColumnLayout {
             spacing: 12
 
             Label { text: "服务管理"; font.pixelSize: 22; font.bold: true; renderType: Text.NativeRendering }
+            Label {
+                text: "查看 systemd 服务状态，控制启用与启停"
+                opacity: 0.6
+                font.pixelSize: 12
+                wrapMode: Text.WordWrap
+                Layout.fillWidth: true
+            }
 
             RowLayout {
                 Layout.fillWidth: true

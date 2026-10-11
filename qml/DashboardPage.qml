@@ -82,48 +82,6 @@ ColumnLayout {
         return ""
     }
 
-    Dialog {
-        id: customDlg
-        title: "自定义卡片"
-        anchors.centerIn: parent
-        modal: true
-        background: Rectangle {
-            color: theme.popupBg
-            border.color: theme.popupBorder
-            radius: 12
-        }
-        header: Label {
-            text: customDlg.title
-            font.pixelSize: 15
-            font.bold: true
-            renderType: Text.NativeRendering
-            color: theme.textMain
-            padding: 16
-            bottomPadding: 4
-        }
-        contentItem: ColumnLayout {
-            width: 300
-            Repeater {
-                model: dash.allCards
-                delegate: AccentCheckBox {
-                    Layout.fillWidth: true
-                    text: modelData.title
-                    checked: dash.visibleCards.indexOf(modelData.id) !== -1
-                    onToggled: dash.setCardVisible(modelData.id, checked)
-                }
-            }
-        }
-        footer: RowLayout {
-            spacing: 8
-            Item { Layout.fillWidth: true }
-            Button {
-                text: "完成"
-                highlighted: true
-                Layout.preferredWidth: 100
-                onClicked: customDlg.close()
-            }
-        }
-    }
 
     ScrollView {
         id: dashScroll
@@ -140,7 +98,48 @@ ColumnLayout {
                     spacing: 8
                     Label { text: "总览"; font.pixelSize: 22; font.bold: true; renderType: Text.NativeRendering }
                     Item { Layout.fillWidth: true }
-                    Button { text: "自定义卡片"; flat: true; onClicked: customDlg.open() }
+                    Button {
+                        id: customBtn
+                        text: "自定义卡片"
+                        flat: true
+                        onClicked: customPopup.open()
+                        // 下拉复选框：从按钮下方弹出，点击外部/按 Esc 关闭
+                        Popup {
+                            id: customPopup
+                            x: customBtn.width - width
+                            y: customBtn.height + 6
+                            width: 300
+                            padding: 12
+                            modal: false
+                            dim: false
+                            closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+                            background: Rectangle {
+                                color: theme.popupBg
+                                border.color: theme.popupBorder
+                                radius: 12
+                            }
+                            contentItem: ColumnLayout {
+                                spacing: 4
+                                Label {
+                                    text: "自定义卡片"
+                                    font.pixelSize: 14
+                                    font.bold: true
+                                    renderType: Text.NativeRendering
+                                    color: theme.textMain
+                                    bottomPadding: 4
+                                }
+                                Repeater {
+                                    model: dash.allCards
+                                    delegate: AccentCheckBox {
+                                        Layout.fillWidth: true
+                                        text: modelData.title
+                                        checked: dash.visibleCards.indexOf(modelData.id) !== -1
+                                        onToggled: dash.setCardVisible(modelData.id, checked)
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
                 Rectangle {

@@ -38,6 +38,13 @@ ColumnLayout {
             spacing: 12
 
                 Label { text: "鼠标指针样式"; font.pixelSize: 22; font.bold: true; renderType: Text.NativeRendering }
+                Label {
+                    text: "导入或切换鼠标指针主题，可实时预览效果"
+                    opacity: 0.6
+                    font.pixelSize: 12
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                }
 
                 GroupBox {
                     title: "导入外部主题"

@@ -35,6 +35,13 @@ ColumnLayout {
             spacing: 12
 
             Label { text: "DNF 调优"; font.pixelSize: 22; font.bold: true; renderType: Text.NativeRendering }
+            Label {
+                text: "调整 DNF 下载与缓存参数，加速软件包下载"
+                opacity: 0.6
+                font.pixelSize: 12
+                wrapMode: Text.WordWrap
+                Layout.fillWidth: true
+            }
 
             Label {
                 text: "未检测到传统 DNF（/etc/dnf/dnf.conf 不存在），暂无可调项。"

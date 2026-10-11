@@ -36,6 +36,13 @@ ColumnLayout {
             spacing: 12
 
             Label { text: "Flatpak 管理"; font.pixelSize: 22; font.bold: true; renderType: Text.NativeRendering }
+            Label {
+                text: "管理 Flatpak 远程源，安装与卸载应用"
+                opacity: 0.6
+                font.pixelSize: 12
+                wrapMode: Text.WordWrap
+                Layout.fillWidth: true
+            }
 
             Label {
                 text: "本机未安装 flatpak"

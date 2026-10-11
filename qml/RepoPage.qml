@@ -64,6 +64,13 @@ ColumnLayout {
         Layout.bottomMargin: 4
         spacing: 8
         Label { text: "软件包管理"; font.pixelSize: 22; font.bold: true; renderType: Text.NativeRendering }
+        Label {
+            text: "搜索安装软件包、管理软件源，检查系统更新"
+            opacity: 0.6
+            font.pixelSize: 12
+            wrapMode: Text.WordWrap
+            Layout.fillWidth: true
+        }
         Item { Layout.fillWidth: true }
         BusyIndicator { visible: repo.busy; running: repo.busy }
         Button { text: "操作日志"; flat: true; onClicked: logDlg.open() }

@@ -103,6 +103,13 @@ ColumnLayout {
             spacing: 12
 
         Label { text: "GRUB 配置"; font.pixelSize: 22; font.bold: true; renderType: Text.NativeRendering }
+        Label {
+            text: "安装或切换 GRUB 启动菜单主题，点右下角「写入并更新 GRUB」生效"
+            opacity: 0.6
+            font.pixelSize: 12
+            wrapMode: Text.WordWrap
+            Layout.fillWidth: true
+        }
 
         GroupBox {
             title: "安装外部主题包"
