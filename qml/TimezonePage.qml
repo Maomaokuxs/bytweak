@@ -71,33 +71,25 @@ ColumnLayout {
                                     radius: 10
                                 }
                             }
+                            Button {
+                                text: tz.busy ? "执行中…" : "应用"
+                                highlighted: true
+                                enabled: !tz.busy
+                                Layout.preferredWidth: 100
+                                onClicked: {
+                                    if (tzCombo.displayText && !tz.setZoneByName(tzCombo.displayText))
+                                        return
+                                    tz.apply()
+                                }
+                            }
+                            BusyIndicator { visible: tz.busy; running: tz.busy }
                         }
                     }
                 }
         }
     }
 
-    RowLayout {
-        Layout.fillWidth: true
-        Layout.leftMargin: 16
-        Layout.rightMargin: 16
-        Layout.topMargin: 8
-        Layout.bottomMargin: 12
-        Layout.alignment: Qt.AlignRight
-        spacing: 8
-        BusyIndicator { visible: tz.busy; running: tz.busy }
-        Button {
-            text: tz.busy ? "执行中…" : "应用"
-            highlighted: true
-            enabled: !tz.busy
-            Layout.preferredWidth: 120
-            onClicked: {
-                if (tzCombo.displayText && !tz.setZoneByName(tzCombo.displayText))
-                    return
-                tz.apply()
-            }
-        }
-    }
+
 
     Component.onCompleted: tz.refresh()
 }

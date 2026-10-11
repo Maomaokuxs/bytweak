@@ -60,6 +60,7 @@ ColumnLayout {
                         Button {
                             id: applyBtn
                             text: "应用"
+                            highlighted: true
                             enabled: !hostname.busy && nameField.text.trim() !== "" && nameField.text.trim() !== hostname.hostname
                             onClicked: {
                                 hostname.setHostname(nameField.text)
