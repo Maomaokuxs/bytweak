@@ -65,8 +65,7 @@ ColumnLayout {
                                 Layout.fillWidth: true
                                 Layout.maximumWidth: 420
                                 readOnly: true
-                                focusHighlight: false
-                                placeholderText: "*.tar.gz / *.zip"
+                                        placeholderText: "*.tar.gz / *.zip"
                                 text: fcitx.filePath
                             }
                             Button { text: "浏览…"; onClicked: fileDlg.open() }

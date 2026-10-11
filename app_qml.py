@@ -24,8 +24,7 @@ def main():
         def eventFilter(self, watched, event):
             if event.type() == _QEvent.Type.MouseButtonPress:
                 try:
-                    win = app.activeWindow()
-                    f = win.activeFocusItem() if win is not None else None
+                    f = watched.activeFocusItem() if hasattr(watched, "activeFocusItem") else None
                     if f is not None:
                         cls = f.metaObject().className()
                         if "TextField" in cls or "SearchBox" in cls:
@@ -41,8 +40,7 @@ def main():
                 except Exception:
                     pass
             return super().eventFilter(watched, event)
-    _focus_filter = _FocusClearFilter(app)
-    app.installEventFilter(_focus_filter)
+    _focus_filter = _FocusClearFilter()
     app.setDesktopFileName("fedora-tweak-tool-qml.desktop")
     # 强制中文 locale：经 SSH 等无 LANG 环境启动时，Qt 对话框（文件选择器）会显示英文；
     # 应用界面本身是中文写死的，这里保持一致
@@ -127,6 +125,11 @@ def main():
         print("Main.qml 加载失败", file=sys.stderr)
         return 1
     logger.info("QML 主程序启动：14 页桥接就绪")
+    try:
+        _win = engine.rootObjects()[0]
+        _win.installEventFilter(_focus_filter)
+    except Exception as e:
+        logger.warning(f"focus filter install failed: {e}")
     try:
         from modules.utils import log_operation, operations_log_path
         log_operation("应用/启动", True)
