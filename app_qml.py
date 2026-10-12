@@ -124,7 +124,8 @@ def main():
         logger.error("Main.qml 加载失败")
         print("Main.qml 加载失败", file=sys.stderr)
         return 1
-    logger.info("QML 主程序启动：14 页桥接就绪")
+    import os as _os
+    logger.info(f"QML 主程序启动：PID={_os.getpid()}，14 页桥接就绪")
     try:
         _win = engine.rootObjects()[0]
         _win.installEventFilter(_focus_filter)

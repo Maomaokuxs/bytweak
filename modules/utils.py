@@ -11,6 +11,20 @@ if not logger.handlers:
     logger.addHandler(handler)
     # 默认简洁：启动/提权/警告/错误；FTT_DEBUG=1 打开全量调试
     logger.setLevel(logging.DEBUG if os.environ.get("FTT_DEBUG") == "1" else logging.INFO)
+    # 文件日志：DEBUG 全量落盘（Rotating），供远程诊断；stderr 丢失时仍可查
+    try:
+        import logging.handlers as _lh
+        _log_dir = os.path.join(os.path.expanduser("~"), ".cache/by-mgr", "fedora-tweak-tool", "logs")
+        os.makedirs(_log_dir, exist_ok=True)
+        _fh = _lh.RotatingFileHandler(
+            os.path.join(_log_dir, "debug.log"),
+            maxBytes=1 * 1024 * 1024, backupCount=2, encoding="utf-8")
+        _fh.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s",
+                                           datefmt="%Y-%m-%d %H:%M:%S"))
+        _fh.setLevel(logging.DEBUG)
+        logger.addHandler(_fh)
+    except Exception as _e:
+        logger.warning(f"file log init failed: {_e}")
 
 # 操作日志：每次执行的功能留痕（by-mgr 命名空间，XDG 缓存目录）
 APP_ID = "fedora-tweak-tool"

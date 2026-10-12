@@ -54,3 +54,6 @@ class Worker(QThread):
                 return
             self.finished_err.emit(str(e))
             log_operation(self._label, False, time.monotonic() - start, str(e))
+            # 关键点：完整堆栈落盘，供远程诊断
+            from .utils import logger as _lg
+            _lg.exception(f"Worker[{self._label}] failed")

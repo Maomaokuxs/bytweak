@@ -194,10 +194,13 @@ class RepoBridge(QObject):
             raise RuntimeError(f"COPR 暂时不可用，{int(left) + 1} 秒后自动重试")
         try:
             result = self._query_guarded(fn, *args)
+            if self._coprDownUntil > 0:
+                logger.info("COPR 熔断恢复：API 调用成功")
             self._coprDownUntil = 0.0
             return result
-        except Exception:
+        except Exception as e:
             self._coprDownUntil = time.monotonic() + COPR_COOLDOWN
+            logger.warning(f"COPR 熔断触发（{COPR_COOLDOWN}s）：{type(e).__name__}: {e}")
             raise
 
     def getCoprResults(self):
