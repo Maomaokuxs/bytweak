@@ -126,6 +126,29 @@ def _check_copr_part(value: str, what: str) -> str:
     return value
 
 
+def _copr_api_get(path: str, params: dict | None = None) -> object:
+    """直接调用 COPR 只读 API（不依赖 python3-copr 库）。
+    返回解析后的 JSON（dict 或 list）；网络异常直接抛。"""
+    import json
+    import urllib.parse
+    import urllib.request
+    url = COPR_HUB.rstrip("/") + "/api_3" + path
+    if params:
+        url += "?" + urllib.parse.urlencode(params)
+    req = urllib.request.Request(url, headers={"User-Agent": "fedora-tweak-tool/1.0"})
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return json.load(resp)
+
+
+def _copr_items(data: object) -> list:
+    if isinstance(data, list):
+        return data
+    if isinstance(data, dict):
+        items = data.get("items", [])
+        return items if isinstance(items, list) else []
+    return []
+
+
 def search_copr_projects(keyword: str, limit: int = 20) -> list[dict]:
     """匿名搜索 COPR 项目（只读公开 API，无需 token）。
     返回 [{owner, project, full, description}]。网络异常直接抛，由调用方提示。
@@ -133,9 +156,8 @@ def search_copr_projects(keyword: str, limit: int = 20) -> list[dict]:
     keyword = (keyword or "").strip()
     if len(keyword) < 2:
         raise ValueError("搜索关键词至少 2 个字符")
-    from copr.v3 import Client
-    resp = Client({"copr_url": COPR_HUB}).project_proxy.search(keyword)
-    items = resp if isinstance(resp, list) else resp.get("items", [])
+    resp = _copr_api_get("/project/search", {"query": keyword})
+    items = _copr_items(resp)
     out = []
     for p in items:
         if len(out) >= limit:
@@ -152,9 +174,12 @@ def list_copr_packages(owner: str, project: str) -> list[str]:
     """列出某 COPR 项目提供的包名（匿名只读）。须在后台线程调用。"""
     owner = _check_copr_part(owner, "作者")
     project = _check_copr_part(project, "项目")
-    from copr.v3 import Client
-    pkgs = Client({"copr_url": COPR_HUB}).package_proxy.get_list(owner, project)
-    return sorted({str(p.get("name") or "") for p in pkgs if p.get("name")})
+    import urllib.parse
+    resp = _copr_api_get(
+        "/package/list/" + urllib.parse.quote(owner, safe="") + "/" + urllib.parse.quote(project, safe="")
+    )
+    pkgs = _copr_items(resp)
+    return sorted({str(p.get("name") or "") for p in pkgs if isinstance(p, dict) and p.get("name")})
 
 
 def build_copr_enable_cmd(owner: str, project: str) -> list[str]:
