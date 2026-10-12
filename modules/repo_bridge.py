@@ -1,5 +1,6 @@
 """软件源 QML 桥接：repo_core 扫描 + 开关分发，后台执行复用 Worker。"""
 import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 import time
 
 from PySide6.QtCore import QObject, Signal, Property, Slot
@@ -280,12 +281,12 @@ class RepoBridge(QObject):
     def _query_guarded(fn, *args):
         """网络查询加超时保护（copr.v3 自身无超时参数）。
         线程池不等待回收：极端卡死时 worker 照常返回，界面不被拖住。"""
-        ex = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+        ex = ThreadPoolExecutor(max_workers=1)
         try:
             fut = ex.submit(fn, *args)
             try:
                 return fut.result(timeout=COPR_QUERY_TIMEOUT)
-            except concurrent.futures.TimeoutError:
+            except FuturesTimeoutError:
                 raise RuntimeError("COPR 请求超时，请检查网络后重试")
         finally:
             ex.shutdown(wait=False, cancel_futures=True)
