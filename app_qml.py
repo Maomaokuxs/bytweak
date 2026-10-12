@@ -58,9 +58,11 @@ def main():
         pass
     app.setStyle("Fusion")
 
-    from modules.theme_bridge import ThemeBridge, detect_dark, LIGHT, DARK
+    from modules.theme_bridge import ThemeBridge, ThemeWatcher, detect_dark, LIGHT, DARK
     from modules.utils import logger
     theme = ThemeBridge(dark=detect_dark(app))
+    _theme_watcher = ThemeWatcher(theme, app)
+    logger.info(f"主题初始化：{'深色' if theme.is_dark() else '浅色'}（Portal 检测）")
     table = DARK if theme.is_dark() else LIGHT
     base_bg = "#2b2b2b" if theme.is_dark() else "#ffffff"
     base_text = "#f3f3f3" if theme.is_dark() else "#111827"
