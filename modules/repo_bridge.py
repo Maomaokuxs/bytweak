@@ -200,7 +200,7 @@ class RepoBridge(QObject):
             return result
         except Exception as e:
             self._coprDownUntil = time.monotonic() + COPR_COOLDOWN
-            logger.warning(f"COPR 熔断触发（{COPR_COOLDOWN}s）：{type(e).__name__}: {e}")
+            logger.exception(f"COPR 熔断触发（{COPR_COOLDOWN}s）")
             raise
 
     def getCoprResults(self):
