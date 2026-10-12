@@ -49,20 +49,50 @@ def main():
         _QLocale.setDefault(_QLocale(_QLocale.Chinese, _QLocale.China))
     except Exception:
         pass
-    # 锁定浅色方案：Fluent 素材按 styleHints 配色解析，平台主题（如深色 GTK）会误判为深色；
-    # 与下方浅色调色板保持一致，否则出现深底深字
+    # 配色方案跟随真实检测（Portal/FTT_THEME），Fluent 内建控件与自绘 theme 桥走同一真相源；
+    # 不再强制锁定浅色，否则运行时切换昼夜时 Fluent 控件不变色
+    from modules.theme_bridge import detect_dark as _detect_dark
+    _is_dark = _detect_dark(app)
     try:
         from PySide6.QtCore import Qt as _Qt
-        app.styleHints().setColorScheme(_Qt.ColorScheme.Light)
+        app.styleHints().setColorScheme(
+            _Qt.ColorScheme.Dark if _is_dark else _Qt.ColorScheme.Light)
     except Exception:
         pass
     app.setStyle("Fusion")
 
     from modules.theme_bridge import ThemeBridge, ThemeWatcher, detect_dark, LIGHT, DARK
     from modules.utils import logger
-    theme = ThemeBridge(dark=detect_dark(app))
+    theme = ThemeBridge(dark=_is_dark)
     _theme_watcher = ThemeWatcher(theme, app)
     logger.info(f"主题初始化：{'深色' if theme.is_dark() else '浅色'}（Portal 检测）")
+    # 运行时切换：Fluent 内建控件跟随 theme 桥一起变色
+    def _on_theme_changed():
+        is_d = theme.is_dark()
+        try:
+            from PySide6.QtCore import Qt as _Qt2
+            app.styleHints().setColorScheme(
+                _Qt2.ColorScheme.Dark if is_d else _Qt2.ColorScheme.Light)
+        except Exception:
+            pass
+        try:
+            _pal = QPalette()
+            for _role, _hexv in [
+                    (QPalette.Window, "#1e1e21" if is_d else "#f0f2f5"),
+                    (QPalette.WindowText, "#f3f3f3" if is_d else "#111827"),
+                    (QPalette.Base, "#2b2b2b" if is_d else "#ffffff"),
+                    (QPalette.Text, "#f3f3f3" if is_d else "#111827"),
+                    (QPalette.Button, "#2b2b2b" if is_d else "#ffffff"),
+                    (QPalette.ButtonText, "#f3f3f3" if is_d else "#111827"),
+                    (QPalette.Highlight, "#60cdff" if is_d else "#005fb8"),
+                    (QPalette.HighlightedText, "#000000" if is_d else "#ffffff"),
+                    (QPalette.AlternateBase, "#333333" if is_d else "#f7f8fa")]:
+                _pal.setColor(_role, QColor(_hexv))
+            app.setPalette(_pal)
+        except Exception:
+            pass
+        logger.info(f"主题切换：{'深色' if is_d else '浅色'}")
+    theme.changed.connect(_on_theme_changed)
     table = DARK if theme.is_dark() else LIGHT
     base_bg = "#2b2b2b" if theme.is_dark() else "#ffffff"
     base_text = "#f3f3f3" if theme.is_dark() else "#111827"
