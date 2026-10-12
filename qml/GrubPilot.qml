@@ -35,8 +35,8 @@ ApplicationWindow {
         onRejected: bridge.chooseVariant(-1)
 
         background: Rectangle {
-            color: "#ffffff"
-            border.color: "#e3e6eb"
+            color: theme.popupBg
+            border.color: theme.popupBorder
             radius: 12
         }
         header: Label {
@@ -44,13 +44,13 @@ ApplicationWindow {
             font.pixelSize: 15
             font.bold: true
             renderType: Text.NativeRendering
-            color: "#111827"
+            color: theme.textMain
             padding: 16
             bottomPadding: 4
         }
         contentItem: ColumnLayout {
             width: 340
-            Label { text: "分辨率款式选择："; color: "#374151" }
+            Label { text: "分辨率款式选择："; color: theme.textMuted }
             ListView {
                 Layout.fillWidth: true
                 Layout.preferredHeight: Math.min(220, choiceDlg.count * 36)
