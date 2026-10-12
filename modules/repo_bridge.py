@@ -10,7 +10,7 @@ from .workers import Worker
 
 # COPR API 在国内网络常被间歇性阻断：超时压短 + 失败后熔断冷却，
 # 避免每次搜索都干等，也避免整个搜索因 COPR 失败而失败。
-COPR_QUERY_TIMEOUT = 15
+COPR_QUERY_TIMEOUT = 45
 COPR_COOLDOWN = 90
 
 
