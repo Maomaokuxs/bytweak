@@ -102,7 +102,7 @@ ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 8
                         Item { Layout.fillWidth: true }
-                        Button {
+                        AppButton {
                             text: "安装到用户"
                             highlighted: true
                             enabled: !flat.busy && installField.text.trim() !== ""
@@ -156,7 +156,7 @@ ColumnLayout {
                                     Layout.fillWidth: true
                                 }
                             }
-                            Button {
+                            AppButton {
                                 text: "卸载"
                                 flat: true
                                 enabled: !flat.busy
@@ -185,13 +185,13 @@ ColumnLayout {
         Layout.alignment: Qt.AlignRight
         spacing: 8
         BusyIndicator { visible: flat.busy; running: flat.busy }
-        Button {
+        AppButton {
             text: "刷新"
             flat: true
             enabled: !flat.busy && flat.available
             onClicked: flat.refresh()
         }
-        Button {
+        AppButton {
             text: "全部更新"
             highlighted: true
             enabled: !flat.busy && flat.available

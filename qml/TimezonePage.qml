@@ -71,7 +71,7 @@ ColumnLayout {
                                     radius: 10
                                 }
                             }
-                            Button {
+                            AppButton {
                                 text: tz.busy ? "执行中…" : "应用"
                                 highlighted: true
                                 enabled: !tz.busy

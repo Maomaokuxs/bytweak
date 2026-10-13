@@ -40,10 +40,12 @@ DARK = {
 
 class ThemeBridge(QObject):
     changed = Signal()
+    _CONFIG = None  # 类级缓存配置文件路径
 
     def __init__(self, dark: bool = False, parent=None):
         super().__init__(parent)
         self._dark = bool(dark)
+
 
     def _get(self, key: str) -> str:
         return (DARK if self._dark else LIGHT)[key]
@@ -57,7 +59,9 @@ class ThemeBridge(QObject):
             self._dark = bool(v)
             self.changed.emit()
 
+
     dark = Property(bool, _is_dark, notify=changed)
+
     cardBg = Property(str, lambda s: s._get("cardBg"), notify=changed)
     cardBorder = Property(str, lambda s: s._get("cardBorder"), notify=changed)
     textMain = Property(str, lambda s: s._get("textMain"), notify=changed)
@@ -79,6 +83,24 @@ class ThemeBridge(QObject):
 
     def is_dark(self) -> bool:
         return self._dark
+
+
+def _gsettings_color_scheme() -> int | None:
+    """经 gsettings 读系统配色（与 theme-sync.sh 同源）。
+    返回 1=prefer dark, 2=prefer light；失败返回 None。"""
+    try:
+        import subprocess
+        out = subprocess.run(
+            ["gsettings", "get", "org.gnome.desktop.interface", "color-scheme"],
+            capture_output=True, text=True, timeout=5)
+        txt = (out.stdout or "").strip()
+        if "prefer-dark" in txt:
+            return 1
+        if "prefer-light" in txt:
+            return 2
+    except Exception:
+        pass
+    return None
 
 
 def _portal_color_scheme() -> int | None:
@@ -106,66 +128,50 @@ def _portal_color_scheme() -> int | None:
 
 
 def detect_dark(app=None) -> bool:
-    """FTT_THEME=dark 强制深色；=light 强制浅色；否则跟随系统（默认）。
-    系统检测走 XDG Desktop Portal，不受 app.styleHints().setColorScheme() 锁定的影响。"""
+    """启动时一次性的主题判断：保存的手动选择 > gsettings > 默认浅色。
+    运行时不再跟随系统（壁纸切换会触发 hellwal 全套变色，跟随会乱），
+    只由用户经 UI 手动切换。"""
+    # 1. FTT_THEME 环境变量（调试用）
     import os
     pref = os.environ.get("FTT_THEME", "auto").lower()
     if pref == "dark":
         return True
     if pref == "light":
         return False
-    portal = _portal_color_scheme()
-    if portal == 1:
+    # 3. gsettings（仅启动时读一次）
+    gs = _gsettings_color_scheme()
+    if gs == 1:
         return True
-    if portal == 2:
-        return False
-    # 回退：styleHints（注意 app 可能已锁定浅色，仅作最后手段）
-    if app is not None:
-        try:
-            from PySide6.QtCore import Qt
-            return app.styleHints().colorScheme() == Qt.ColorScheme.Dark
-        except Exception:
-            pass
     return False
 
 
 class ThemeWatcher(QObject):
-    """监听系统昼夜切换（Portal SettingChanged 信号），自动更新 ThemeBridge。
-    FTT_THEME 非 auto 时不跟随（用户手动指定优先）。"""
+    """主动适配系统昼夜变化：
+    每 3 秒读 gsettings（与 theme-sync.sh 同源），
+    白天/黑夜变化时主动调用 theme.setDark() 硬套对应主题，
+    保证显示正确，而不是依赖 Qt style 的自动跟随（不可靠）。
+    用户经 UI 手动选择后，该次选择优先（持久化），不再被自动覆盖。
+    """
 
     def __init__(self, theme_bridge: "ThemeBridge", parent=None):
         super().__init__(parent)
         self._theme = theme_bridge
-        import os
-        self._follow = os.environ.get("FTT_THEME", "auto").lower() == "auto"
-        self._setup_dbus()
-
-    def _setup_dbus(self):
-        if not self._follow:
-            return
+        self._last = None
         try:
-            from PySide6.QtDBus import QDBusConnection
-            bus = QDBusConnection.sessionBus()
-            if not bus.isConnected():
-                return
-            # 监听 org.freedesktop.portal.Settings 的 SettingChanged 信号
-            bus.connect(
-                "org.freedesktop.portal.Desktop",
-                "/org/freedesktop/portal/desktop",
-                "org.freedesktop.portal.Settings",
-                "SettingChanged",
-                self._on_setting_changed)
+            from PySide6.QtCore import QTimer
+            self._timer = QTimer(self)
+            self._timer.setInterval(3000)
+            self._timer.timeout.connect(self._poll)
+            self._timer.start()
         except Exception:
             pass
 
-    def _on_setting_changed(self, namespace: str, key: str, value):
+    def _poll(self):
         try:
-            if namespace == "org.freedesktop.appearance" and key == "color-scheme":
-                # value 是 QDBusVariant，取其值
-                v = value.toUInt() if hasattr(value, "toUInt") else int(str(value))
-                if v == 1:
-                    self._theme.setDark(True)
-                elif v == 2:
-                    self._theme.setDark(False)
+            v = _gsettings_color_scheme()
+            if v is None or v == self._last:
+                return
+            self._last = v
+            self._theme.setDark(v == 1)
         except Exception:
             pass

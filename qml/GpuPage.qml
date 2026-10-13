@@ -118,13 +118,13 @@ ColumnLayout {
         Layout.topMargin: 8
         Layout.bottomMargin: 12
         spacing: 8
-        Button {
+        AppButton {
             text: "刷新检测"
             flat: true
             enabled: !gpu.busy
             onClicked: gpu.refresh()
         }
-        Button {
+        AppButton {
             text: "复制诊断信息"
             flat: true
             enabled: !gpu.busy
@@ -132,7 +132,7 @@ ColumnLayout {
         }
         Item { Layout.fillWidth: true }
         BusyIndicator { visible: gpu.busy; running: gpu.busy }
-        Button {
+        AppButton {
             text: gpu.busy ? "正在后台执行，请稍候…" : gpu.actionText
             highlighted: true
             enabled: gpu.actionEnabled

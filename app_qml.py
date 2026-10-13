@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Fedora Tweak Tool · QML 版主程序：FluentWinUI3 + 14 桥接，后端全部复用 *_core。
+"""bytweak · QML 版主程序：FluentWinUI3 + 14 桥接，后端全部复用 *_core。
 运行：python3 app_qml.py"""
 import os
 import sys
@@ -41,7 +41,7 @@ def main():
                     pass
             return super().eventFilter(watched, event)
     _focus_filter = _FocusClearFilter()
-    app.setDesktopFileName("fedora-tweak-tool-qml.desktop")
+    app.setDesktopFileName("bytweak-qml.desktop")
     # 强制中文 locale：经 SSH 等无 LANG 环境启动时，Qt 对话框（文件选择器）会显示英文；
     # 应用界面本身是中文写死的，这里保持一致
     try:
@@ -64,35 +64,15 @@ def main():
     from modules.theme_bridge import ThemeBridge, ThemeWatcher, detect_dark, LIGHT, DARK
     from modules.utils import logger
     theme = ThemeBridge(dark=_is_dark)
-    _theme_watcher = ThemeWatcher(theme, app)
     logger.info(f"主题初始化：{'深色' if theme.is_dark() else '浅色'}（Portal 检测）")
-    # 运行时切换：Fluent 内建控件跟随 theme 桥一起变色
+    # 运行时切换：只走 theme 桥（QML 绑定自动更新）。
+    # 不碰 styleHints/QPalette——FluentWinUI3 启动时已缓存配色，
+    # 运行时改它只会造成"读取系统配色"的残留。
     def _on_theme_changed():
-        is_d = theme.is_dark()
-        try:
-            from PySide6.QtCore import Qt as _Qt2
-            app.styleHints().setColorScheme(
-                _Qt2.ColorScheme.Dark if is_d else _Qt2.ColorScheme.Light)
-        except Exception:
-            pass
-        try:
-            _pal = QPalette()
-            for _role, _hexv in [
-                    (QPalette.Window, "#1e1e21" if is_d else "#f0f2f5"),
-                    (QPalette.WindowText, "#f3f3f3" if is_d else "#111827"),
-                    (QPalette.Base, "#2b2b2b" if is_d else "#ffffff"),
-                    (QPalette.Text, "#f3f3f3" if is_d else "#111827"),
-                    (QPalette.Button, "#2b2b2b" if is_d else "#ffffff"),
-                    (QPalette.ButtonText, "#f3f3f3" if is_d else "#111827"),
-                    (QPalette.Highlight, "#60cdff" if is_d else "#005fb8"),
-                    (QPalette.HighlightedText, "#000000" if is_d else "#ffffff"),
-                    (QPalette.AlternateBase, "#333333" if is_d else "#f7f8fa")]:
-                _pal.setColor(_role, QColor(_hexv))
-            app.setPalette(_pal)
-        except Exception:
-            pass
-        logger.info(f"主题切换：{'深色' if is_d else '浅色'}")
+        logger.info(f"主题切换：{'深色' if theme.is_dark() else '浅色'}")
     theme.changed.connect(_on_theme_changed)
+    # 主动适配：跟随系统昼夜（gsettings），变化时硬套主题保证显示正确
+    _theme_watcher = ThemeWatcher(theme, app)
     table = DARK if theme.is_dark() else LIGHT
     base_bg = "#2b2b2b" if theme.is_dark() else "#ffffff"
     base_text = "#f3f3f3" if theme.is_dark() else "#111827"

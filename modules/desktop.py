@@ -6,7 +6,7 @@ try:
     from .utils import logger
 except Exception:
     import logging
-    logger = logging.getLogger("fedora-tweak-tool")
+    logger = logging.getLogger("bytweak")
 
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QFrame,
                                QRadioButton, QPushButton, QLabel, QCheckBox,

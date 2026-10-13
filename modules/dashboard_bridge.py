@@ -9,7 +9,7 @@ from PySide6.QtCore import QObject, Signal, Property, Slot
 
 from .utils import logger, get_os_info, is_fedora, is_atomic
 
-CONFIG_DIR = os.path.expanduser("~/.config/fedora-tweak-tool")
+CONFIG_DIR = os.path.expanduser("~/.config/bytweak")
 CONFIG_PATH = os.path.join(CONFIG_DIR, "dashboard.json")
 
 ALL_CARDS = [

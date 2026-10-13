@@ -63,7 +63,7 @@ ColumnLayout {
                         onToggled: desk.setPersist(checked)
                     }
                     Item { Layout.fillWidth: true }
-                    Button { text: "刷新状态"; flat: true; onClicked: desk.refresh() }
+                    AppButton { text: "刷新状态"; flat: true; onClicked: desk.refresh() }
                 }
         }
     }
@@ -76,7 +76,7 @@ ColumnLayout {
         Layout.bottomMargin: 12
         Layout.alignment: Qt.AlignRight
         spacing: 8
-        Button {
+        AppButton {
             text: "应用切换"
             highlighted: true
             Layout.preferredWidth: 140

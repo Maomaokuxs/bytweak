@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-// 操作日志查看：展示 ~/.cache/by-mgr/fedora-tweak-tool/logs/operations.log 尾部
+// 操作日志查看：展示 ~/.cache/by-mgr/bytweak/logs/operations.log 尾部
 Dialog {
     id: root
     anchors.centerIn: parent
@@ -90,25 +90,25 @@ Dialog {
             }
         }
         Label {
-            text: "日志文件：~/.cache/by-mgr/fedora-tweak-tool/logs/operations.log"
+            text: "日志文件：~/.cache/by-mgr/bytweak/logs/operations.log"
             opacity: 0.6
             font.pixelSize: 11
         }
     }
     footer: RowLayout {
         spacing: 8
-        Button {
+        AppButton {
             text: "清空日志"
             flat: true
             onClicked: repo.clearOpLog()
         }
         Item { Layout.fillWidth: true }
-        Button {
+        AppButton {
             text: "刷新"
             flat: true
             onClicked: repo.refreshOpLog()
         }
-        Button {
+        AppButton {
             text: "关闭"
             highlighted: true
             Layout.preferredWidth: 100

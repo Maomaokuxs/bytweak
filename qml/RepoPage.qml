@@ -54,6 +54,57 @@ ColumnLayout {
             msgDlg.details = repo.lastOutput
             msgDlg.open()
         }
+        function onSearchTimeout(label) {
+            timeoutDlg.timeoutLabel = label
+            timeoutDlg.open()
+        }
+    }
+
+    // 搜索超时提示：30 秒未完成，让用户选择继续等待或终止
+    Dialog {
+        id: timeoutDlg
+        anchors.centerIn: parent
+        modal: true
+        title: "搜索时间较长"
+        property string timeoutLabel: "搜索"
+        background: Rectangle {
+            color: theme.popupBg
+            border.color: theme.popupBorder
+            radius: 12
+        }
+        header: Label {
+            text: timeoutDlg.title
+            font.pixelSize: 15
+            font.bold: true
+            color: theme.textMain
+            padding: 16
+            bottomPadding: 4
+        }
+        contentItem: ColumnLayout {
+            spacing: 12
+            Label {
+                text: "“" + timeoutDlg.timeoutLabel + "”已执行 2 分钟仍未完成，是否继续等待？"
+                color: theme.textMuted
+                wrapMode: Text.WordWrap
+                Layout.preferredWidth: 320
+            }
+            RowLayout {
+                Layout.alignment: Qt.AlignRight
+                spacing: 8
+                AppButton {
+                    text: "终止搜索"
+                    onClicked: {
+                        repo.cancelSearch()
+                        timeoutDlg.close()
+                    }
+                }
+                AppButton {
+                    text: "继续等待"
+                    highlighted: true
+                    onClicked: timeoutDlg.close()
+                }
+            }
+        }
     }
 
     RowLayout {
@@ -72,9 +123,16 @@ ColumnLayout {
             Layout.fillWidth: true
         }
         Item { Layout.fillWidth: true }
+        Label {
+            visible: repo.busy && repo.busyLabel !== ""
+            text: repo.busyLabel
+            opacity: 0.7
+            font.pixelSize: 12
+            color: theme.textMuted
+        }
         BusyIndicator { visible: repo.busy; running: repo.busy }
-        Button { text: "操作日志"; flat: true; onClicked: logDlg.open() }
-        Button { text: "软件源配置"; onClicked: repoDrawer.open() }
+        AppButton { text: "操作日志"; flat: true; onClicked: logDlg.open() }
+        AppButton { text: "软件源配置"; onClicked: repoDrawer.open() }
     }
 
     ScrollView {
@@ -111,7 +169,7 @@ ColumnLayout {
                                     focus = false
                                 }
                             }
-                            Button {
+                            AppButton {
                                 text: "搜索"
                                 enabled: !repo.coprBusy
                                 onClicked: {
@@ -121,7 +179,7 @@ ColumnLayout {
                                     repo.unifiedSearch(uniQuery.text)
                                 }
                             }
-                            Button {
+                            AppButton {
                                 text: resultsExpanded ? "收起" : "展开"
                                 flat: true
                                 visible: officialPkgList.length + thirdPkgList.length + coprPkgList.length + repo.coprResults.length > 0
@@ -154,7 +212,7 @@ ColumnLayout {
                                 Layout.fillWidth: true
                                 font.pixelSize: 12
                             }
-                            Button {
+                            AppButton {
                                 text: "重试"
                                 flat: true
                                 enabled: !repo.coprBusy
@@ -180,7 +238,7 @@ ColumnLayout {
                                         Layout.fillWidth: true
                                         elide: Text.ElideRight
                                     }
-                                    Button {
+                                    AppButton {
                                         text: isInstalled ? "卸载" : "安装"
                                         enabled: !repo.busy
                                         onClicked: isInstalled ? repo.removePackage(pkgName) : repo.installPackage(pkgName)
@@ -276,7 +334,7 @@ ColumnLayout {
                                         Layout.fillWidth: true
                                         elide: Text.ElideRight
                                     }
-                                    Button {
+                                    AppButton {
                                         text: coprExpanded === projFull ? "收起" : "软件包"
                                         flat: true
                                         enabled: !repo.coprBusy
@@ -289,7 +347,7 @@ ColumnLayout {
                                             }
                                         }
                                     }
-                                    Button {
+                                    AppButton {
                                         text: isEnabled ? "已启用" : "启用"
                                         enabled: !repo.busy && !isEnabled
                                         onClicked: repo.enableCopr(modelData.owner, modelData.project)
@@ -321,7 +379,7 @@ ColumnLayout {
                                                     Layout.fillWidth: true
                                                     elide: Text.ElideRight
                                                 }
-                                                Button {
+                                                AppButton {
                                                     text: isInstalled ? "卸载" : "安装"
                                                     flat: true
                                                     enabled: !repo.busy
@@ -423,13 +481,13 @@ ColumnLayout {
                                 text: !repo.upgradesChecked ? (repo.coprBusy ? "正在检查更新…" : "尚未检查更新") : (repo.upgradablePkgs.length === 0 ? "系统已是最新" : "有 " + repo.upgradablePkgs.length + " 个软件包可更新")
                                 Layout.fillWidth: true
                             }
-                            Button {
+                            AppButton {
                                 text: "检查更新"
                                 flat: true
                                 enabled: !repo.coprBusy
                                 onClicked: repo.refreshUpgrades()
                             }
-                            Button {
+                            AppButton {
                                 text: "一键升级"
                                 highlighted: true
                                 enabled: !repo.busy && repo.upgradesChecked && repo.upgradablePkgs.length > 0
@@ -466,13 +524,13 @@ ColumnLayout {
                                 text: "软件包缓存占用：" + repo.cacheSize
                                 Layout.fillWidth: true
                             }
-                            Button {
+                            AppButton {
                                 text: "清理缓存"
                                 flat: true
                                 enabled: !repo.busy
                                 onClicked: repo.cleanCache()
                             }
-                            Button {
+                            AppButton {
                                 text: "自动移除孤包"
                                 enabled: !repo.busy
                                 onClicked: repo.autoremove()
@@ -587,7 +645,7 @@ ColumnLayout {
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 8
-                Button {
+                AppButton {
                     text: "刷新"
                     flat: true
                     enabled: !repo.busy
@@ -595,13 +653,13 @@ ColumnLayout {
                 }
                 Item { Layout.fillWidth: true }
                 BusyIndicator { visible: repo.busy; running: repo.busy }
-                Button { text: "关闭"; highlighted: true; onClicked: repoDrawer.close() }
+                AppButton { text: "关闭"; highlighted: true; onClicked: repoDrawer.close() }
             }
         }
     }
 
     Component.onCompleted: {
-        repo.refresh()
-        repo.refreshUpgrades()
+        // 懒加载后首次进页不自动刷新，用户点"刷新检测"手动触发
+        // 避免 180 秒的 refreshUpgrades 阻塞 UI
     }
 }

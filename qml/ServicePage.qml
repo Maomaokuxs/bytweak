@@ -117,7 +117,7 @@ ColumnLayout {
                                 enabled: !svc.busy && modelData.enabledState !== "static" && modelData.enabledState !== "masked"
                                 onToggled: svc.setEnabled(modelData.id, checked)
                             }
-                            Button {
+                            AppButton {
                                 text: modelData.active ? "停止" : "启动"
                                 flat: !modelData.active
                                 enabled: !svc.busy
@@ -147,7 +147,7 @@ ColumnLayout {
         Layout.alignment: Qt.AlignRight
         spacing: 8
         BusyIndicator { visible: svc.busy; running: svc.busy }
-        Button {
+        AppButton {
             text: "刷新"
             flat: true
             enabled: !svc.busy

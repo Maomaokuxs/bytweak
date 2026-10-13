@@ -232,7 +232,7 @@ def main():
     hl.addWidget(icon)
     tbox = QVBoxLayout()
     tbox.setSpacing(0)
-    t1 = QLabel("Fedora Tweak Tool")
+    t1 = QLabel("bytweak")
     t1.setObjectName("app_title_lbl")
     t2 = QLabel("系统微调 · 简洁现代")
     t2.setObjectName("app_sub_lbl")

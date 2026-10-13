@@ -11,7 +11,7 @@ ApplicationWindow {
     height: 680
     minimumWidth: 820
     minimumHeight: 560
-    title: "Fedora Tweak Tool"
+    title: "bytweak"
 
     // 极简导航：竖线条 + 文字 + 选中阴影衬底（附关键字供搜索过滤）
     // 同类功能已合并为选项卡：导航 8 项，组内顶部 TabBar 切换
@@ -23,7 +23,8 @@ ApplicationWindow {
         { "name": "输入设备", "page": 4, "keys": "输入设备 输入法 拼音 fcitx input 鼠标 指针 光标 mouse cursor" },
         { "name": "软件管理", "page": 5, "keys": "软件管理 软件包 安装 copr 软件源 仓库 rpm fusion repo dnf flatpak 沙盒 flathub 调优 镜像 缓存 并行" },
         { "name": "桌面环境", "page": 6, "keys": "桌面环境 桌面 通知 顶栏 waybar quickshell mako dunst 自启 niri 快捷键 热键 hotkey keybind 默认应用 打开方式 mime" },
-        { "name": "服务管理", "page": 7, "keys": "服务 自启 开机 systemctl systemd service 启动 停止" }
+        { "name": "服务管理", "page": 7, "keys": "服务 自启 开机 systemctl systemd service 启动 停止" },
+        { "name": "关于", "page": 8, "keys": "关于 about 版本 开源 开源项目 致谢" }
     ]
 
     function filterNav(q) {
@@ -48,14 +49,21 @@ ApplicationWindow {
         nav.currentIndex = -1
     }
 
+    property var _visitedPages: [0]  // 已实例化的页面索引，首页默认加载
     function gotoPage(page, sub) {
         if (searchField.displayText !== "")
             searchField.clear()
         searchField.focus = false
+        // 懒加载：首次访问时激活对应 Loader
+        if (_visitedPages.indexOf(page) === -1) {
+            _visitedPages.push(page)
+            _visitedPagesChanged()
+        }
         stack.currentIndex = page
         syncNavHighlight()
         if (sub !== undefined && sub !== null) {
-            const child = stack.children[page]
+            const loader = stack.children[page]
+            const child = loader && loader.item ? loader.item : loader
             if (child && typeof child.showTab === "function")
                 child.showTab(sub)
         }
@@ -193,6 +201,7 @@ ApplicationWindow {
 
         AppDialog { id: sysWarnDlg }
 
+
         Component.onCompleted: {
             if (!dash.isFedora) {
                 sysWarnDlg.title = "系统不受支持"
@@ -227,17 +236,19 @@ ApplicationWindow {
                 anchors.fill: parent
                 currentIndex: 0
 
-                DashboardPage {}
-                SystemTabsPage {}
-                BootTabsPage {}
-                GpuPage {}
-                InputTabsPage {}
-                SoftwareTabsPage {}
-                DesktopTabsPage {}
-                ServicePage {}
+                Loader { active: _visitedPages.indexOf(0) !== -1; sourceComponent: DashboardPage {} }
+                Loader { active: _visitedPages.indexOf(1) !== -1; sourceComponent: SystemTabsPage {} }
+                Loader { active: _visitedPages.indexOf(2) !== -1; sourceComponent: BootTabsPage {} }
+                Loader { active: _visitedPages.indexOf(3) !== -1; sourceComponent: GpuPage {} }
+                Loader { active: _visitedPages.indexOf(4) !== -1; sourceComponent: InputTabsPage {} }
+                Loader { active: _visitedPages.indexOf(5) !== -1; sourceComponent: SoftwareTabsPage {} }
+                Loader { active: _visitedPages.indexOf(6) !== -1; sourceComponent: DesktopTabsPage {} }
+                Loader { active: _visitedPages.indexOf(7) !== -1; sourceComponent: ServicePage {} }
+                Loader { active: _visitedPages.indexOf(8) !== -1; sourceComponent: AboutPage {} }
 
                 onCurrentIndexChanged: {
-                    const page = stack.children[stack.currentIndex]
+                    const loader = stack.children[stack.currentIndex]
+                    const page = loader && loader.item ? loader.item : null
                     if (!page)
                         return
                     fadeAnim.stop()

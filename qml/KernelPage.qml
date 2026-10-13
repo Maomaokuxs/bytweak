@@ -92,14 +92,14 @@ ColumnLayout {
                                 font.pixelSize: 12
                             }
                         }
-                        Button {
+                        AppButton {
                             text: "设为默认"
                             flat: true
                             visible: !modelData.is_default
                             enabled: !kernel.busy
                             onClicked: kernel.setDefault(modelData.full)
                         }
-                        Button {
+                        AppButton {
                             text: confirmFull === modelData.full ? "确认删除？" : "删除"
                             enabled: !kernel.busy && !modelData.current && !modelData.is_default && kernel.kernels.length > 1
                             onClicked: {
@@ -134,7 +134,7 @@ ColumnLayout {
         Layout.alignment: Qt.AlignRight
         spacing: 8
         BusyIndicator { visible: kernel.busy; running: kernel.busy }
-        Button {
+        AppButton {
             text: "刷新"
             flat: true
             enabled: !kernel.busy

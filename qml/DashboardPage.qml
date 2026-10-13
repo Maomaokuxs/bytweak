@@ -98,7 +98,7 @@ ColumnLayout {
                     spacing: 8
                     Label { text: "总览"; font.pixelSize: 22; font.bold: true; renderType: Text.NativeRendering }
                     Item { Layout.fillWidth: true }
-                    Button {
+                    AppButton {
                         id: customBtn
                         text: "自定义卡片"
                         flat: true

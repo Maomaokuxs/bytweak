@@ -79,7 +79,7 @@ ColumnLayout {
         Layout.alignment: Qt.AlignRight
         spacing: 8
         BusyIndicator { visible: defapp.busy; running: defapp.busy }
-        Button {
+        AppButton {
             text: "刷新"
             flat: true
             enabled: !defapp.busy

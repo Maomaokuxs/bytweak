@@ -69,12 +69,12 @@ ApplicationWindow {
         footer: RowLayout {
             spacing: 8
             Item { Layout.fillWidth: true }
-            Button {
+            AppButton {
                 text: "取消"
                 Layout.preferredWidth: 100
                 onClicked: choiceDlg.reject()
             }
-            Button {
+            AppButton {
                 text: "确定"
                 highlighted: true
                 Layout.preferredWidth: 100
@@ -115,7 +115,7 @@ ApplicationWindow {
                     placeholderText: "未选择，可直接切换本地主题"
                     text: bridge.filePath
                 }
-                Button { text: "浏览…"; onClicked: fileDlg.open() }
+                AppButton { text: "浏览…"; onClicked: fileDlg.open() }
             }
         }
 
@@ -145,13 +145,13 @@ ApplicationWindow {
             Layout.alignment: Qt.AlignRight
             spacing: 8
             BusyIndicator { visible: bridge.busy; running: bridge.busy }
-            Button {
+            AppButton {
                 text: "刷新"
                 flat: true
                 enabled: !bridge.busy
                 onClicked: bridge.refreshThemes()
             }
-            Button {
+            AppButton {
                 text: bridge.busy ? "执行中…" : "写入并更新 GRUB"
                 highlighted: true
                 enabled: !bridge.busy

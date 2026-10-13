@@ -122,7 +122,7 @@ class GpuBridge(QObject):
         """复制诊断摘要到剪贴板（设备 + 驱动 + 编解码矩阵纯文本）。"""
         try:
             from PySide6.QtWidgets import QApplication
-            lines = ["Fedora Tweak Tool 显卡诊断"]
+            lines = ["bytweak 显卡诊断"]
             for g in self._gpus:
                 pci = f" [{g['pci']}]" if g["pci"] else ""
                 lines.append(f"- {g['vendor']} · {g['name']}{pci}")

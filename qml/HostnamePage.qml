@@ -57,7 +57,7 @@ ColumnLayout {
                             maximumLength: 64
                             Keys.onReturnPressed: applyBtn.clicked()
                         }
-                        Button {
+                        AppButton {
                             id: applyBtn
                             text: "应用"
                             highlighted: true
@@ -87,7 +87,7 @@ ColumnLayout {
         Layout.alignment: Qt.AlignRight
         spacing: 8
         BusyIndicator { visible: hostname.busy; running: hostname.busy }
-        Button {
+        AppButton {
             text: "刷新"
             flat: true
             enabled: !hostname.busy

@@ -4,7 +4,7 @@ import subprocess
 import logging
 from datetime import datetime
 
-logger = logging.getLogger("fedora-tweak-tool")
+logger = logging.getLogger("bytweak")
 if not logger.handlers:
     handler = logging.StreamHandler()
     handler.setFormatter(logging.Formatter("[%(levelname)s] %(message)s"))
@@ -14,7 +14,7 @@ if not logger.handlers:
     # 文件日志：DEBUG 全量落盘（Rotating），供远程诊断；stderr 丢失时仍可查
     try:
         import logging.handlers as _lh
-        _log_dir = os.path.join(os.path.expanduser("~"), ".cache/by-mgr", "fedora-tweak-tool", "logs")
+        _log_dir = os.path.join(os.path.expanduser("~"), ".cache/by-mgr", "bytweak", "logs")
         os.makedirs(_log_dir, exist_ok=True)
         _fh = _lh.RotatingFileHandler(
             os.path.join(_log_dir, "debug.log"),
@@ -27,7 +27,7 @@ if not logger.handlers:
         logger.warning(f"file log init failed: {_e}")
 
 # 操作日志：每次执行的功能留痕（by-mgr 命名空间，XDG 缓存目录）
-APP_ID = "fedora-tweak-tool"
+APP_ID = "bytweak"
 LOG_DIR = os.path.join(os.path.expanduser("~"), ".cache/by-mgr", APP_ID, "logs")
 OPERATIONS_LOG = os.path.join(LOG_DIR, "operations.log")
 LOG_ROTATE_SIZE = 512 * 1024
@@ -78,9 +78,26 @@ def get_basearch(fallback: str = "x86_64") -> str:
     return fallback
 
 
+def _proxy_env_args() -> list[str]:
+    """pkexec 默认清环境，代理变量传不过去导致 dnf 直连卡死。
+    用 env 显式透传代理相关变量（图形授权仍走 pkexec）。"""
+    import os
+    args = []
+    for k in ("http_proxy", "https_proxy", "all_proxy",
+              "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "no_proxy", "NO_PROXY"):
+        v = os.environ.get(k)
+        if v:
+            args.append(f"{k}={v}")
+    return args
+
+
 def run_pkexec(cmd: list[str], timeout: int | None = None) -> subprocess.CompletedProcess:
-    """安全提权执行：列表形式，无 shell 注入"""
-    full = ["pkexec"] + cmd
+    """安全提权执行：列表形式，无 shell 注入；透传代理环境变量"""
+    proxy_args = _proxy_env_args()
+    if proxy_args:
+        full = ["pkexec", "env"] + proxy_args + cmd
+    else:
+        full = ["pkexec"] + cmd
     logger.info(f"pkexec: {shlex.join(full)}")
     return subprocess.run(full, capture_output=True, text=True, timeout=timeout)
 
@@ -88,6 +105,11 @@ def run_pkexec(cmd: list[str], timeout: int | None = None) -> subprocess.Complet
 def run_pkexec_shell(script: str, timeout: int | None = None) -> subprocess.CompletedProcess:
     """多命令 shell 提权：script 由内部可信拼接，调用方需自行 shlex.quote 变量插值"""
     logger.info(f"pkexec sh -c: {script[:300]}")
+    proxy_args = _proxy_env_args()
+    if proxy_args:
+        # env 透传代理变量，再 sh -c
+        return subprocess.run(["pkexec", "env"] + proxy_args + ["sh", "-c", script],
+                              capture_output=True, text=True, timeout=timeout)
     return subprocess.run(["pkexec", "sh", "-c", script], capture_output=True, text=True, timeout=timeout)
 
 

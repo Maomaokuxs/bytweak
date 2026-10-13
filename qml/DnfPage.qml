@@ -136,13 +136,13 @@ ColumnLayout {
         Layout.alignment: Qt.AlignRight
         spacing: 8
         BusyIndicator { visible: dnf.busy; running: dnf.busy }
-        Button {
+        AppButton {
             text: "刷新"
             flat: true
             enabled: !dnf.busy && dnf.supported
             onClicked: dnf.refresh()
         }
-        Button {
+        AppButton {
             text: "应用"
             highlighted: true
             Layout.preferredWidth: 120

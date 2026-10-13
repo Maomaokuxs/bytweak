@@ -181,13 +181,13 @@ Dialog {
     footer: RowLayout {
         spacing: 8
         Item { Layout.fillWidth: true }
-        Button {
+        AppButton {
             text: "取消"
             flat: true
             Layout.preferredWidth: 90
             onClicked: root.reject()
         }
-        Button {
+        AppButton {
             text: "保存"
             highlighted: true
             Layout.preferredWidth: 100

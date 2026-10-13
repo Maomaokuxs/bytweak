@@ -62,7 +62,7 @@ ColumnLayout {
                                         placeholderText: "*.tar.gz / *.zip"
                                 text: cursor.filePath
                             }
-                            Button { text: "浏览…"; onClicked: fileDlg.open() }
+                            AppButton { text: "浏览…"; onClicked: fileDlg.open() }
                         }
                     }
                 }
@@ -115,7 +115,7 @@ ColumnLayout {
         Layout.bottomMargin: 12
         Layout.alignment: Qt.AlignRight
         spacing: 8
-        Button {
+        AppButton {
             text: "应用"
             highlighted: true
             Layout.preferredWidth: 120

@@ -68,12 +68,12 @@ ColumnLayout {
         footer: RowLayout {
             spacing: 8
             Item { Layout.fillWidth: true }
-            Button {
+            AppButton {
                 text: "取消"
                 Layout.preferredWidth: 100
                 onClicked: choiceDlg.reject()
             }
-            Button {
+            AppButton {
                 text: "确定"
                 highlighted: true
                 Layout.preferredWidth: 100
@@ -127,7 +127,7 @@ ColumnLayout {
                         placeholderText: "未选择，可直接切换本地主题"
                         text: grub.filePath
                     }
-                    Button { text: "浏览…"; onClicked: fileDlg.open() }
+                    AppButton { text: "浏览…"; onClicked: fileDlg.open() }
                 }
             }
         }
@@ -175,13 +175,13 @@ ColumnLayout {
         Layout.alignment: Qt.AlignRight
         spacing: 8
         BusyIndicator { visible: grub.busy; running: grub.busy }
-        Button {
+        AppButton {
             text: "刷新"
             flat: true
             enabled: !grub.busy
             onClicked: grub.refreshThemes()
         }
-        Button {
+        AppButton {
             text: grub.busy ? "执行中…" : "写入并更新 GRUB"
             highlighted: true
             enabled: !grub.busy

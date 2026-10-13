@@ -58,14 +58,14 @@ Dialog {
     }
     footer: RowLayout {
         spacing: 8
-        Button {
+        AppButton {
             text: root.showDetails ? "隐藏输出" : "查看输出"
             flat: true
             visible: root.details !== ""
             onClicked: root.showDetails = !root.showDetails
         }
         Item { Layout.fillWidth: true }
-        Button {
+        AppButton {
             text: "确定"
             highlighted: true
             Layout.preferredWidth: 100

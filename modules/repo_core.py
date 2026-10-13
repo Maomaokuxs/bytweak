@@ -12,6 +12,11 @@ COPR_ID_PATTERN = re.compile(r'^[A-Za-z0-9_.-]+$')
 PKG_NAME_PATTERN = re.compile(r'^[A-Za-z0-9._:+-]+$')
 COPR_HUB = "https://copr.fedorainfracloud.org"
 
+import time as _time
+# COPR 搜索缓存：{keyword: (timestamp, results)}，5 分钟 TTL
+_copr_search_cache: dict[str, tuple[float, list]] = {}
+_COPR_CACHE_TTL = 300
+
 # (展示名, 标识, 是否已部署的检测路径)
 RECOMMEND_MANIFEST = [
     ("RPM Fusion 官方合集 (自由与非自由源)", "REC_RPM_FUSION", "/etc/yum.repos.d/rpmfusion-free.repo"),
@@ -135,7 +140,7 @@ def _copr_api_get(path: str, params: dict | None = None) -> object:
     url = COPR_HUB.rstrip("/") + "/api_3" + path
     if params:
         url += "?" + urllib.parse.urlencode(params)
-    req = urllib.request.Request(url, headers={"User-Agent": "fedora-tweak-tool/1.0"})
+    req = urllib.request.Request(url, headers={"User-Agent": "bytweak/1.0"})
     with urllib.request.urlopen(req, timeout=30) as resp:
         return json.load(resp)
 
@@ -152,10 +157,16 @@ def _copr_items(data: object) -> list:
 def search_copr_projects(keyword: str, limit: int = 20) -> list[dict]:
     """匿名搜索 COPR 项目（只读公开 API，无需 token）。
     返回 [{owner, project, full, description}]。网络异常直接抛，由调用方提示。
-    注意：须在后台线程调用。"""
+    注意：须在后台线程调用。带 5 分钟内存缓存。"""
     keyword = (keyword or "").strip()
     if len(keyword) < 2:
         raise ValueError("搜索关键词至少 2 个字符")
+    # 查缓存
+    now = _time.monotonic()
+    if keyword in _copr_search_cache:
+        ts, cached = _copr_search_cache[keyword]
+        if now - ts < _COPR_CACHE_TTL:
+            return cached[:limit]
     resp = _copr_api_get("/project/search", {"query": keyword})
     items = _copr_items(resp)
     out = []
@@ -167,6 +178,7 @@ def search_copr_projects(keyword: str, limit: int = 20) -> list[dict]:
             continue
         out.append({"owner": owner, "project": name, "full": f"{owner}/{name}",
                     "description": (p.get("description") or "").strip()[:200]})
+    _copr_search_cache[keyword] = (_time.monotonic(), out)
     return out
 
 
@@ -174,9 +186,9 @@ def list_copr_packages(owner: str, project: str) -> list[str]:
     """列出某 COPR 项目提供的包名（匿名只读）。须在后台线程调用。"""
     owner = _check_copr_part(owner, "作者")
     project = _check_copr_part(project, "项目")
-    import urllib.parse
+    # COPR API v3 用 query 参数，不是 path：/package/list?ownername=X&projectname=Y
     resp = _copr_api_get(
-        "/package/list/" + urllib.parse.quote(owner, safe="") + "/" + urllib.parse.quote(project, safe="")
+        "/package/list", {"ownername": owner, "projectname": project}
     )
     pkgs = _copr_items(resp)
     return sorted({str(p.get("name") or "") for p in pkgs if isinstance(p, dict) and p.get("name")})

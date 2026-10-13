@@ -1,10 +1,10 @@
-Name:           fedora-tweak-tool
+Name:           bytweak
 Version:        1.1.5
 Release:        2%{?dist}
 Summary:        基于 PySide6 的简易 Fedora 系统调节工具
 
 License:        GPLv3+
-URL:            https://github.com/Maomaokuxs/fedora-tweak-tool
+URL:            https://github.com/Maomaokuxs/bytweak
 
 # Copr 官方 rpkg 魔法宏
 Source0:        {{{ git_dir_pack }}}
@@ -31,39 +31,39 @@ sed -i '1i #!/usr/bin/python3' app.py
 
 %install
 mkdir -p %{buildroot}%{_bindir}
-mkdir -p %{buildroot}%{_datadir}/fedora-tweak-tool
+mkdir -p %{buildroot}%{_datadir}/bytweak
 mkdir -p %{buildroot}%{_datadir}/applications
 
 # 畅通无阻的平铺拷贝
-cp app.py %{buildroot}%{_bindir}/fedora-tweak-tool
-cp main.ui %{buildroot}%{_datadir}/fedora-tweak-tool/main.ui
-cp style.qss %{buildroot}%{_datadir}/fedora-tweak-tool/style.qss
-cp style-dark.qss %{buildroot}%{_datadir}/fedora-tweak-tool/style-dark.qss
+cp app.py %{buildroot}%{_bindir}/bytweak
+cp main.ui %{buildroot}%{_datadir}/bytweak/main.ui
+cp style.qss %{buildroot}%{_datadir}/bytweak/style.qss
+cp style-dark.qss %{buildroot}%{_datadir}/bytweak/style-dark.qss
 
 # 🌟 核心增补：将业务子模块集群及其物理目录顺滑平铺导入系统静态目录
-cp -r modules %{buildroot}%{_datadir}/fedora-tweak-tool/
+cp -r modules %{buildroot}%{_datadir}/bytweak/
 
 # 规范化定向输出桌面启动图标
-echo "[Desktop Entry]" > %{buildroot}%{_datadir}/applications/fedora-tweak-tool.desktop
-echo "Type=Application" >> %{buildroot}%{_datadir}/applications/fedora-tweak-tool.desktop
-echo "Name=Fedora Tweak Tool" >> %{buildroot}%{_datadir}/applications/fedora-tweak-tool.desktop
-echo "Comment=简易时区修改、GRUB2 智能主题全家桶与显卡加速配置" >> %{buildroot}%{_datadir}/applications/fedora-tweak-tool.desktop
-echo "Exec=fedora-tweak-tool" >> %{buildroot}%{_datadir}/applications/fedora-tweak-tool.desktop
-echo "Icon=system-run" >> %{buildroot}%{_datadir}/applications/fedora-tweak-tool.desktop
-echo "Terminal=false" >> %{buildroot}%{_datadir}/applications/fedora-tweak-tool.desktop
-echo "Categories=System;Settings;" >> %{buildroot}%{_datadir}/applications/fedora-tweak-tool.desktop
-echo "StartupNotify=true" >> %{buildroot}%{_datadir}/applications/fedora-tweak-tool.desktop
-echo "StartupWMClass=fedora-tweak-tool" >> %{buildroot}%{_datadir}/applications/fedora-tweak-tool.desktop
+echo "[Desktop Entry]" > %{buildroot}%{_datadir}/applications/bytweak.desktop
+echo "Type=Application" >> %{buildroot}%{_datadir}/applications/bytweak.desktop
+echo "Name=bytweak" >> %{buildroot}%{_datadir}/applications/bytweak.desktop
+echo "Comment=简易时区修改、GRUB2 智能主题全家桶与显卡加速配置" >> %{buildroot}%{_datadir}/applications/bytweak.desktop
+echo "Exec=bytweak" >> %{buildroot}%{_datadir}/applications/bytweak.desktop
+echo "Icon=system-run" >> %{buildroot}%{_datadir}/applications/bytweak.desktop
+echo "Terminal=false" >> %{buildroot}%{_datadir}/applications/bytweak.desktop
+echo "Categories=System;Settings;" >> %{buildroot}%{_datadir}/applications/bytweak.desktop
+echo "StartupNotify=true" >> %{buildroot}%{_datadir}/applications/bytweak.desktop
+echo "StartupWMClass=bytweak" >> %{buildroot}%{_datadir}/applications/bytweak.desktop
 
 %files
 # 无视 Git 原生权限，落地强制赋予 0755
-%attr(0755, root, root) %{_bindir}/fedora-tweak-tool
-%{_datadir}/fedora-tweak-tool/main.ui
-%{_datadir}/fedora-tweak-tool/style.qss
-%{_datadir}/fedora-tweak-tool/style-dark.qss
+%attr(0755, root, root) %{_bindir}/bytweak
+%{_datadir}/bytweak/main.ui
+%{_datadir}/bytweak/style.qss
+%{_datadir}/bytweak/style-dark.qss
 # 🌟 声明整个子模块目录所有权（自动剔除 pycache 干扰）
-%{_datadir}/fedora-tweak-tool/modules/
-%{_datadir}/applications/fedora-tweak-tool.desktop
+%{_datadir}/bytweak/modules/
+%{_datadir}/applications/bytweak.desktop
 
 %changelog
 * Mon Jun 22 2026 biyuan <biyuan@fedoraproject.org> - 1.1.5-2

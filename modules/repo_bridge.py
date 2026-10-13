@@ -19,7 +19,10 @@ class RepoBridge(QObject):
     reposChanged = Signal()
     recommendedChanged = Signal()
     busyChanged = Signal()
+    busyLabelChanged = Signal()
     coprResultsChanged = Signal()
+    # 搜索超时提示：30 秒未完成时触发，QML 弹框让用户选择继续等待或终止
+    searchTimeout = Signal(str)
     coprPackagesChanged = Signal()
     coprBusyChanged = Signal()
     pkgResultsChanged = Signal()
@@ -38,6 +41,7 @@ class RepoBridge(QObject):
         self._repos: list[dict] = []
         self._recommended: list[dict] = []
         self._busy = False
+        self._busyLabel = ""
         self._loading = False
         self._coprResults: list[dict] = []
         self._coprPackages: list[str] = []
@@ -53,6 +57,8 @@ class RepoBridge(QObject):
         self._opLogText = ""
         self._officialHints: dict = {}
         self._workers: list[Worker] = []
+        self._currentWorker = None
+        self._promptTimer = None
 
     def getRepos(self):
         return self._repos
@@ -73,6 +79,16 @@ class RepoBridge(QObject):
             self.busyChanged.emit()
 
     busy = Property(bool, getBusy, notify=busyChanged)
+
+    def getBusyLabel(self):
+        return self._busyLabel
+
+    def _setBusyLabel(self, v: str):
+        if self._busyLabel != v:
+            self._busyLabel = v
+            self.busyLabelChanged.emit()
+
+    busyLabel = Property(str, getBusyLabel, notify=busyLabelChanged)
 
     @Slot()
     def refresh(self):
@@ -131,11 +147,13 @@ class RepoBridge(QObject):
 
     def _run_async(self, task_fn, success_msg: str, after=None, label: str = "", timeout: float = 0):
         self._setBusy(True)
+        self._setBusyLabel(label or "正在执行…")
         worker = Worker(task_fn, label=label or "软件源/提权执行", timeout=timeout)
         self._workers.append(worker)
 
         def on_ok(result):
             self._setBusy(False)
+            self._setBusyLabel("")
             try:
                 out = (getattr(result, "stdout", "") or "")
                 err = (getattr(result, "stderr", "") or "")
@@ -151,6 +169,7 @@ class RepoBridge(QObject):
 
         def on_err(msg: str):
             self._setBusy(False)
+            self._setBusyLabel("")
             self._setLastOutput(f"【{label or '操作'}】执行失败", msg)
             if "canceled" not in msg.lower() and "dismissed" not in msg.lower():
                 hint = repo_core.diagnose_failure(msg)
@@ -295,16 +314,24 @@ class RepoBridge(QObject):
         if self._coprBusy:
             return
         self._setCoprBusy(True)
+        self._setBusyLabel(label or "正在查询…")
         worker = Worker(task_fn, label=label or "软件源/查询", timeout=timeout)
         self._workers.append(worker)
+        self._currentWorker = worker
 
         def on_ok(data):
             self._setCoprBusy(False)
+            self._currentWorker = None
+            if self._promptTimer:
+                self._promptTimer.stop()
             on_data(data)
             self._cleanup(worker)
 
         def on_err(msg: str):
             self._setCoprBusy(False)
+            self._currentWorker = None
+            if self._promptTimer:
+                self._promptTimer.stop()
             hint = repo_core.diagnose_failure(msg)
             prefix = f"⚠ {hint}\n\n" if hint else ""
             self.message.emit("查询失败", f"{prefix}{msg}", True)
@@ -313,6 +340,29 @@ class RepoBridge(QObject):
         worker.finished_ok.connect(on_ok)
         worker.finished_err.connect(on_err)
         worker.start()
+        # 30 秒未完成：提示用户是否继续等待
+        from PySide6.QtCore import QTimer
+        self._promptTimer = QTimer(self)
+        self._promptTimer.setSingleShot(True)
+        self._promptTimer.timeout.connect(lambda: self._on_search_slow(label))
+        self._promptTimer.start(120000)  # 2 分钟后提示用户是否继续等待
+
+    def _on_search_slow(self, label: str):
+        # 30 秒还没完成（且 worker 还在跑）：弹框让用户选
+        if self._currentWorker and self._currentWorker.isRunning():
+            self.searchTimeout.emit(label or "搜索")
+
+    @Slot()
+    def cancelSearch(self):
+        """用户选择终止搜索：放弃等待，后台线程结果会被丢弃。"""
+        if self._promptTimer:
+            self._promptTimer.stop()
+        # 标记超时，后续结果不再上报（复用 Worker 的 timed_out 机制）
+        if self._currentWorker:
+            self._currentWorker.timed_out = True
+        self._currentWorker = None
+        self._setCoprBusy(False)
+        self._set_copr_error("已取消搜索")
 
     def _merge_hints(self, hints: dict):
         merged = dict(self._officialHints)

@@ -220,7 +220,7 @@ ColumnLayout {
                                             }
                                         }
 
-                                        Button {
+                                        AppButton {
                                             text: "编辑"
                                             flat: true
                                             visible: !modelData.disabled
@@ -304,7 +304,7 @@ ColumnLayout {
             color: theme.textMain
         }
         Item { Layout.fillWidth: true }
-        Button { text: "刷新"; flat: true; onClicked: niri.refresh() }
+        AppButton { text: "刷新"; flat: true; onClicked: niri.refresh() }
     }
 
     Component.onCompleted: niri.refresh()
