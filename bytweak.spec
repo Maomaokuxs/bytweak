@@ -37,6 +37,10 @@ ln -s %{_datadir}/bytweak/app_qml.py %{buildroot}%{_bindir}/bytweak
 cp -r modules %{buildroot}%{_datadir}/bytweak/
 cp -r qml %{buildroot}%{_datadir}/bytweak/
 
+# 图标
+mkdir -p %{buildroot}%{_datadir}/icons/hicolor/scalable/apps
+cp icons/bytweak.svg %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/bytweak.svg
+
 # 桌面启动文件
 cat > %{buildroot}%{_datadir}/applications/bytweak.desktop <<'EOF'
 [Desktop Entry]
@@ -44,7 +48,7 @@ Type=Application
 Name=bytweak
 Comment=Fedora 系统调节工具
 Exec=bytweak
-Icon=system-run
+Icon=bytweak
 Terminal=false
 Categories=System;Settings;
 StartupNotify=true
@@ -55,6 +59,7 @@ EOF
 %attr(0755, root, root) %{_bindir}/bytweak
 %{_datadir}/bytweak/
 %{_datadir}/applications/bytweak.desktop
+%{_datadir}/icons/hicolor/scalable/apps/bytweak.svg
 
 %changelog
 * Tue Oct 13 2026 cai <cai@example.com> - 0.1.0-1
