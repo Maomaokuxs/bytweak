@@ -1,6 +1,6 @@
 Name:           bytweak
-Version:        1.1.5
-Release:        2%{?dist}
+Version:        0.1.0
+Release:        1%{?dist}
 Summary:        基于 PySide6 的简易 Fedora 系统调节工具
 
 License:        GPLv3+
