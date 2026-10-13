@@ -124,7 +124,7 @@ ColumnLayout {
         }
         Item { Layout.fillWidth: true }
         Label {
-            visible: repo.busy && repo.busyLabel !== ""
+            visible: (repo.busy || repo.coprBusy) && repo.busyLabel !== ""
             text: repo.busyLabel
             opacity: 0.7
             font.pixelSize: 12

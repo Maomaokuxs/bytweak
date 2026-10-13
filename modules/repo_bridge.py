@@ -321,6 +321,7 @@ class RepoBridge(QObject):
 
         def on_ok(data):
             self._setCoprBusy(False)
+            self._setBusyLabel("")
             self._currentWorker = None
             if self._promptTimer:
                 self._promptTimer.stop()
@@ -329,6 +330,7 @@ class RepoBridge(QObject):
 
         def on_err(msg: str):
             self._setCoprBusy(False)
+            self._setBusyLabel("")
             self._currentWorker = None
             if self._promptTimer:
                 self._promptTimer.stop()
