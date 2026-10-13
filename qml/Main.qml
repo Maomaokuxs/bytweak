@@ -50,6 +50,8 @@ ApplicationWindow {
     }
 
     property var _visitedPages: [0]  // 已实例化的页面索引，首页默认加载
+    property var _pendingSub: null      // 懒加载竞态：页面未加载完时暂存的 sub
+    property int _pendingSubPage: -1
     function gotoPage(page, sub) {
         if (searchField.displayText !== "")
             searchField.clear()
@@ -63,9 +65,14 @@ ApplicationWindow {
         syncNavHighlight()
         if (sub !== undefined && sub !== null) {
             const loader = stack.children[page]
-            const child = loader && loader.item ? loader.item : loader
-            if (child && typeof child.showTab === "function")
+            const child = loader && loader.item ? loader.item : null
+            if (child && typeof child.showTab === "function") {
                 child.showTab(sub)
+            } else {
+                // 页面还没加载完（Loader.item 为 null），暂存，等 onLoaded 时应用
+                _pendingSub = sub
+                _pendingSubPage = page
+            }
         }
     }
 
@@ -236,15 +243,15 @@ ApplicationWindow {
                 anchors.fill: parent
                 currentIndex: 0
 
-                Loader { active: _visitedPages.indexOf(0) !== -1; sourceComponent: DashboardPage {} }
-                Loader { active: _visitedPages.indexOf(1) !== -1; sourceComponent: SystemTabsPage {} }
-                Loader { active: _visitedPages.indexOf(2) !== -1; sourceComponent: BootTabsPage {} }
-                Loader { active: _visitedPages.indexOf(3) !== -1; sourceComponent: GpuPage {} }
-                Loader { active: _visitedPages.indexOf(4) !== -1; sourceComponent: InputTabsPage {} }
-                Loader { active: _visitedPages.indexOf(5) !== -1; sourceComponent: SoftwareTabsPage {} }
-                Loader { active: _visitedPages.indexOf(6) !== -1; sourceComponent: DesktopTabsPage {} }
-                Loader { active: _visitedPages.indexOf(7) !== -1; sourceComponent: ServicePage {} }
-                Loader { active: _visitedPages.indexOf(8) !== -1; sourceComponent: AboutPage {} }
+                Loader { active: _visitedPages.indexOf(0) !== -1; sourceComponent: DashboardPage {}; onLoaded: { if (_pendingSubPage === 0 && _pendingSub !== null && item && typeof item.showTab === 'function') { item.showTab(_pendingSub); _pendingSub = null; _pendingSubPage = -1; } } }
+                Loader { active: _visitedPages.indexOf(1) !== -1; sourceComponent: SystemTabsPage {}; onLoaded: { if (_pendingSubPage === 1 && _pendingSub !== null && item && typeof item.showTab === 'function') { item.showTab(_pendingSub); _pendingSub = null; _pendingSubPage = -1; } } }
+                Loader { active: _visitedPages.indexOf(2) !== -1; sourceComponent: BootTabsPage {}; onLoaded: { if (_pendingSubPage === 2 && _pendingSub !== null && item && typeof item.showTab === 'function') { item.showTab(_pendingSub); _pendingSub = null; _pendingSubPage = -1; } } }
+                Loader { active: _visitedPages.indexOf(3) !== -1; sourceComponent: GpuPage {}; onLoaded: { if (_pendingSubPage === 3 && _pendingSub !== null && item && typeof item.showTab === 'function') { item.showTab(_pendingSub); _pendingSub = null; _pendingSubPage = -1; } } }
+                Loader { active: _visitedPages.indexOf(4) !== -1; sourceComponent: InputTabsPage {}; onLoaded: { if (_pendingSubPage === 4 && _pendingSub !== null && item && typeof item.showTab === 'function') { item.showTab(_pendingSub); _pendingSub = null; _pendingSubPage = -1; } } }
+                Loader { active: _visitedPages.indexOf(5) !== -1; sourceComponent: SoftwareTabsPage {}; onLoaded: { if (_pendingSubPage === 5 && _pendingSub !== null && item && typeof item.showTab === 'function') { item.showTab(_pendingSub); _pendingSub = null; _pendingSubPage = -1; } } }
+                Loader { active: _visitedPages.indexOf(6) !== -1; sourceComponent: DesktopTabsPage {}; onLoaded: { if (_pendingSubPage === 6 && _pendingSub !== null && item && typeof item.showTab === 'function') { item.showTab(_pendingSub); _pendingSub = null; _pendingSubPage = -1; } } }
+                Loader { active: _visitedPages.indexOf(7) !== -1; sourceComponent: ServicePage {}; onLoaded: { if (_pendingSubPage === 7 && _pendingSub !== null && item && typeof item.showTab === 'function') { item.showTab(_pendingSub); _pendingSub = null; _pendingSubPage = -1; } } }
+                Loader { active: _visitedPages.indexOf(8) !== -1; sourceComponent: AboutPage {}; onLoaded: { if (_pendingSubPage === 8 && _pendingSub !== null && item && typeof item.showTab === 'function') { item.showTab(_pendingSub); _pendingSub = null; _pendingSubPage = -1; } } }
 
                 onCurrentIndexChanged: {
                     const loader = stack.children[stack.currentIndex]
