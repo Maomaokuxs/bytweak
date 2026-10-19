@@ -4,7 +4,7 @@
 import os
 import sys
 
-BASE = os.path.dirname(os.path.abspath(__file__))
+BASE = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, BASE)
 
 
